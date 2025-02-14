@@ -9,10 +9,10 @@ import { errorHandler } from './middlewares/error-handler';
 import { notFoundHandler } from './middlewares/not-found-handler';
 import userRoutes from './modules/user/user.routes';
 import authRoutes from './modules/auth/auth.routes';
+import app from './app';
 
 dotenv.config();
 
-const app: Express = express();
 const port = Number(process.env.PORT) || 3000;
 
 // Middleware
@@ -33,14 +33,30 @@ apiRouter.use('/auth', authRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
+// Function to connect to MongoDB
+const connectDB = async () => {
+  try {
+    console.log('Connecting to MongoDB...');
+    await mongoose.connect(process.env.MONGODB_URI!, CONSTANTS.MONGODB.OPTIONS);
+    console.log('Connected to MongoDB');
+    return true;
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    return false;
+  }
+};
+
 // Function to start server
 const startServer = async () => {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI!, CONSTANTS.MONGODB.OPTIONS);
-    console.log('Connected to MongoDB');
-    
-    // Start server
+    // Try to connect to MongoDB
+    const isConnected = await connectDB();
+    if (!isConnected) {
+      console.error('Failed to connect to MongoDB. Exiting...');
+      process.exit(1);
+    }
+
+    // Start the server
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     }).on('error', (err: NodeJS.ErrnoException) => {
@@ -57,6 +73,18 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+// Handle process events
+process.on('SIGINT', async () => {
+  try {
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed through app termination');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error during app termination:', error);
+    process.exit(1);
+  }
+});
 
 startServer();
 

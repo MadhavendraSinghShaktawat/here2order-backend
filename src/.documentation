@@ -15,25 +15,25 @@ POST /auth/signup
 #### Request Body
 json
 {
-"email": "restaurant@example.com",
-"password": "Password123!",
-"name": "John Doe",
-"phone": "+1234567890",
-"restaurant": {
-"name": "The Great Restaurant",
-"address": {
-"street": "123 Main St",
-"city": "New York",
-"state": "NY",
-"postalCode": "10001",
-"country": "USA"
-},
-"contact": {
-"phone": "+1234567890",
-"email": "contact@restaurant.com"
-}
-}
-}
+    "email": "restaurant1@example.com",
+    "password": "Password123!",
+    "name": "John Doe",
+    "phone": "+1234567890",
+    "restaurant": {
+      "name": "The Great Restaurant",
+      "address": {
+        "street": "123 Main St",
+        "city": "New York",
+        "state": "NY",
+        "postalCode": "10001",
+        "country": "USA"
+      },
+      "contact": {
+        "phone": "+1234567890",
+        "email": "contact@restaurant.com"
+      }
+    }
+  }
 
 
 #### Response (201 Created)
@@ -43,7 +43,7 @@ json
 "data": {
 "user": {
 "id": "65f1a2b3c4d5e6f7g8h9i0j1",
-"email": "restaurant@example.com",
+"email": "restaurant1@example.com",
 "name": "John Doe",
 "role": "Restaurant_Admin",
 "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2"
@@ -63,8 +63,8 @@ Login with email and password.
 #### Request Body
 json
 {
-"email": "restaurant@example.com",
-"password": "Password123!"
+    "email": "restaurant1@example.com",
+    "password": "Password123!"
 }
 
 
@@ -76,7 +76,7 @@ json
 "data": {
 "user": {
 "id": "65f1a2b3c4d5e6f7g8h9i0j1",
-"email": "restaurant@example.com",
+"email": "restaurant1@example.com",
 "name": "John Doe",
 "role": "Restaurant_Admin",
 "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2"
@@ -138,7 +138,22 @@ json
 ======================================================================
 ======================================================================
 
+POST /api/v1/staff/invite
+{
+  "email": "staff@example.com",
+  "name": "Staff Member",
+  "phone": "+1234567890",
+  "position": "Waiter"
+}
 
+
+Get all staff members
+
+GET /api/v1/staff
+
+
+======================================================================
+======================================================================
 
 
 ## Testing with Postman
@@ -223,3 +238,145 @@ json
 7. Use test scripts to validate responses
 
 ### Common Headers
+
+## Staff Management
+
+### Invite Staff Member
+Invite a new staff member to join the restaurant.
+
+POST /staff/invite
+#### Headers
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Request Body
+```json
+{
+  "email": "staff@example.com",
+  "name": "Staff Member",
+  "phone": "+1234567890",
+  "position": "Waiter"
+}
+```
+
+#### Response (201 Created)
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j3",
+    "email": "staff@example.com",
+    "name": "Staff Member",
+    "phone": "+1234567890",
+    "position": "Waiter",
+    "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
+    "status": "Pending",
+    "invitedBy": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "invitedAt": "2024-03-15T10:30:00.000Z",
+    "joinedAt": null
+  }
+}
+```
+
+### Get All Staff Members
+Get a list of all staff members and pending invites.
+
+GET /staff
+#### Headers
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Response (200 OK)
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "id": "65f1a2b3c4d5e6f7g8h9i0j3",
+      "email": "staff@example.com",
+      "name": "Staff Member",
+      "phone": "+1234567890",
+      "position": "Waiter",
+      "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
+      "status": "Pending",
+      "invitedBy": "65f1a2b3c4d5e6f7g8h9i0j1",
+      "invitedAt": "2024-03-15T10:30:00.000Z",
+      "joinedAt": null
+    },
+    {
+      "id": "65f1a2b3c4d5e6f7g8h9i0j4",
+      "email": "active.staff@example.com",
+      "name": "Active Staff",
+      "phone": "+1234567891",
+      "position": "Staff",
+      "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
+      "status": "Active",
+      "invitedBy": "",
+      "invitedAt": "2024-03-14T10:30:00.000Z",
+      "joinedAt": "2024-03-14T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+## Error Responses
+
+### 400 Bad Request
+```json
+{
+  "status": "error",
+  "message": "Invalid input data",
+  "details": "Email is required"
+}
+```
+
+### 401 Unauthorized
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+### 403 Forbidden
+```json
+{
+  "status": "error",
+  "message": "Not authorized to perform this action"
+}
+```
+
+### 404 Not Found
+```json
+{
+  "status": "error",
+  "message": "Resource not found"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "status": "error",
+  "message": "Internal server error"
+}
+```
+
+## Notes
+- All timestamps are in ISO 8601 format
+- All IDs are MongoDB ObjectIds
+- JWT tokens expire in 7 days
+- Staff invites expire in 48 hours
+- Phone numbers should be in E.164 format
+
+
+=== Registered Routes ===
+POST /api/v1/auth/signup
+POST /api/v1/auth/login
+GET /api/v1/users
+POST /api/v1/staff/invite
+GET /api/v1/staff
+GET /api/v1/staff/test
+========================

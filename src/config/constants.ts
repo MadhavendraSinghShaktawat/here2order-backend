@@ -9,9 +9,13 @@ export const CONSTANTS = {
   },
   MONGODB: {
     OPTIONS: {
-      autoIndex: true,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
+      family: 4,
+      retryWrites: true,
+      w: 'majority'
     }
   },
   JWT: {
