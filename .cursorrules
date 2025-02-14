@@ -122,7 +122,7 @@ Generate code, corrections, and refactorings that comply with the basic principl
 
 ### Security & Authentication
 
-- Use Clerk for authentication.
+- Use NextAuth for authentication.
   - Restrict access based on roles.
   - Verify JWT tokens on each request.
 - Sanitize user inputs to prevent NoSQL injection attacks.

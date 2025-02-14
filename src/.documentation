@@ -1,0 +1,225 @@
+# Here2Order API Documentation
+
+## Base URL 
+
+http://localhost:3000/api/v1
+
+
+## Authentication
+
+### Register Restaurant Admin
+Register a new restaurant admin and create their restaurant.
+
+======================================================================
+POST /auth/signup
+#### Request Body
+json
+{
+"email": "restaurant@example.com",
+"password": "Password123!",
+"name": "John Doe",
+"phone": "+1234567890",
+"restaurant": {
+"name": "The Great Restaurant",
+"address": {
+"street": "123 Main St",
+"city": "New York",
+"state": "NY",
+"postalCode": "10001",
+"country": "USA"
+},
+"contact": {
+"phone": "+1234567890",
+"email": "contact@restaurant.com"
+}
+}
+}
+
+
+#### Response (201 Created)
+json
+{
+"status": "success",
+"data": {
+"user": {
+"id": "65f1a2b3c4d5e6f7g8h9i0j1",
+"email": "restaurant@example.com",
+"name": "John Doe",
+"role": "Restaurant_Admin",
+"restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2"
+},
+"token": "eyJhbGciOiJIUzI1NiIsInR5..."
+}
+}
+
+======================================================================
+
+======================================================================
+
+### Login
+Login with email and password.
+
+
+#### Request Body
+json
+{
+"email": "restaurant@example.com",
+"password": "Password123!"
+}
+
+
+
+#### Response (200 OK)
+json
+{
+"status": "success",
+"data": {
+"user": {
+"id": "65f1a2b3c4d5e6f7g8h9i0j1",
+"email": "restaurant@example.com",
+"name": "John Doe",
+"role": "Restaurant_Admin",
+"restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2"
+},
+"token": "eyJhbGciOiJIUzI1NiIsInR5..."
+}
+}
+======================================================================
+======================================================================
+
+
+## Restaurant Management
+
+### Get Restaurant Details
+Get details of a specific restaurant.
+
+GET /restaurants/:id
+#### Headers
+Authorization: Bearer <jwt_token>
+
+
+#### Response (200 OK)
+json
+{
+"status": "success",
+"data": {
+"id": "65f1a2b3c4d5e6f7g8h9i0j2",
+"name": "The Great Restaurant",
+"adminId": "65f1a2b3c4d5e6f7g8h9i0j1",
+"address": {
+"street": "123 Main St",
+"city": "New York",
+"state": "NY",
+"postalCode": "10001",
+"country": "USA"
+},
+"contact": {
+"phone": "+1234567890",
+"email": "contact@restaurant.com"
+},
+"businessHours": [
+{
+"day": "Monday",
+"open": "09:00",
+"close": "17:00",
+"isClosed": false
+},
+// ... other days
+],
+"isActive": true,
+"settings": {
+"currency": "USD",
+"language": "en",
+"timezone": "UTC",
+"tableCount": 0
+}
+}
+}
+======================================================================
+======================================================================
+
+
+
+
+## Testing with Postman
+
+### Setting Up Postman
+
+1. Create a new Postman Collection named "Here2Order API"
+2. Set up environment variables:
+   - `BASE_URL`: http://localhost:3000/api/v1
+   - `TOKEN`: (This will be automatically set after login)
+
+### Test Flow
+
+1. **Register Restaurant Admin**
+   - Method: POST
+   - URL: {{BASE_URL}}/auth/signup
+   - Body: raw (JSON)
+   - Copy the request body from the documentation above
+   - Send request
+   - Verify 201 status code
+   - Save the token from response
+
+2. **Login**
+   - Method: POST
+   - URL: {{BASE_URL}}/auth/login
+   - Body: raw (JSON)
+   - Use the email and password from registration
+   - Send request
+   - Verify 200 status code
+   - Save the token using this script in the "Tests" tab:
+   ```javascript
+   if (pm.response.code === 200) {
+     pm.environment.set('TOKEN', pm.response.json().data.token);
+   }
+   ```
+
+3. **Get Restaurant Details**
+   - Method: GET
+   - URL: {{BASE_URL}}/restaurants/:id
+   - Headers: 
+     ```
+     Authorization: Bearer {{TOKEN}}
+     ```
+   - Use the restaurantId from login response
+   - Send request
+   - Verify 200 status code
+
+### Error Scenarios to Test
+
+1. **Registration Validation**
+   - Try registering with invalid email format
+   - Try registering with short password
+   - Try registering with existing email
+
+2. **Login Validation**
+   - Try logging in with wrong password
+   - Try logging in with non-existent email
+
+3. **Authentication**
+   - Try accessing protected routes without token
+   - Try accessing protected routes with invalid token
+   - Try accessing protected routes with expired token
+
+### Response Status Codes
+
+- 200: Success
+- 201: Created
+- 400: Bad Request (validation errors)
+- 401: Unauthorized (invalid/missing token)
+- 403: Forbidden (insufficient permissions)
+- 404: Not Found
+- 500: Internal Server Error
+
+### Best Practices
+
+1. Always check the response status code
+2. Verify the response structure matches the documentation
+3. Test with both valid and invalid data
+4. Test authorization for all protected routes
+5. Save commonly used values as environment variables
+6. Use pre-request scripts for setup when needed
+7. Use test scripts to validate responses
+
+### Common Headers
