@@ -21,10 +21,14 @@ export const authenticate = async (
 
     // Verify token
     const decoded = jwt.verify(token, CONSTANTS.JWT.SECRET) as JwtPayload;
+    
+    // Get user with restaurantId
+    const user = await User.findById(decoded.userId)
+      .select('+restaurantId')
+      .lean();
 
-    // Get user
-    const user = await User.findById(decoded.userId);
     if (!user) {
+      console.error(`User not found for ID: ${decoded.userId}`);
       throw new UnauthorizedError('User not found');
     }
 

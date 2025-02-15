@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 import bcrypt from 'bcrypt';
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { User } from '../user/user.model';
 import { Restaurant } from '../restaurant/restaurant.model';
 import { SignupDto, LoginDto, AuthResponse } from './auth.types';
@@ -24,19 +24,20 @@ export class AuthController {
   }
 
   private generateToken(payload: TokenPayload): string {
-    const options: SignOptions = {
-      expiresIn: Number(CONSTANTS.JWT.EXPIRES_IN)
-    };
-    
-    return jwt.sign(
-      {
-        userId: payload.userId.toString(),
-        role: payload.role,
-        restaurantId: payload.restaurantId?.toString()
-      },
-      CONSTANTS.JWT.SECRET,
-      options
-    );
+    try {
+      return jwt.sign(
+        {
+          userId: payload.userId.toString(),
+          role: payload.role,
+          restaurantId: payload.restaurantId?.toString()
+        },
+        CONSTANTS.JWT.SECRET,
+        { expiresIn: CONSTANTS.JWT.EXPIRES_IN }
+      );
+    } catch (error) {
+      console.error('Token generation error:', error);
+      throw error;
+    }
   }
 
   public async signup(req: Request, res: Response, next: NextFunction): Promise<void> {

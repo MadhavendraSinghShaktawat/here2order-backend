@@ -9,6 +9,7 @@ import { notFoundHandler } from './middlewares/not-found-handler';
 import userRoutes from './modules/user/user.routes';
 import authRoutes from './modules/auth/auth.routes';
 import staffRoutes from './modules/staff/staff.routes';
+import restaurantRoutes from './modules/restaurant/restaurant.routes';
 
 dotenv.config();
 
@@ -64,6 +65,9 @@ apiRouter.use('/users', userRoutes);
 
 console.log('- /staff');
 apiRouter.use('/staff', staffRoutes);
+
+console.log('- /restaurants');
+apiRouter.use('/restaurants', restaurantRoutes);
 
 // Print all registered routes
 const printRoutes = (app: Express) => {
