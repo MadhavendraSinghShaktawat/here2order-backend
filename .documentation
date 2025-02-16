@@ -504,14 +504,28 @@ id: Staff member or invitation ID
   - Inactive: Staff member has been deactivated
 
 === Registered Routes ===
-POST /api/v1/auth/signup
-POST /api/v1/auth/login
-GET /api/v1/users
-POST /api/v1/staff/invite
-GET /api/v1/staff
-PUT /api/v1/staff/:id
-DELETE /api/v1/staff/:id
-========================
+Authentication Routes:
+POST /api/v1/auth/signup # Register new restaurant admin
+POST /api/v1/auth/login # Login for restaurant admin
+POST /api/v1/auth/staff/login # Login for staff members
+POST /api/v1/auth/staff-register # Complete staff registration with invite
+
+User Routes:
+GET /api/v1/users # Get user profile
+
+Staff Management Routes:
+POST /api/v1/staff/invite # Create staff invitation
+GET /api/v1/staff # List all staff and invitations
+PUT /api/v1/staff/:id # Update staff member details
+DELETE /api/v1/staff/:id # Remove staff member or cancel invite
+
+Table Management Routes:
+POST /api/v1/table # Create new table with QR code
+GET /api/v1/table # List all restaurant tables
+GET /api/v1/table/:id # Get specific table details
+PUT /api/v1/table/:id # Update table details
+DELETE /api/v1/table/:id # Delete table and QR code
+=======================
 
 ### Staff Login
 
@@ -620,3 +634,245 @@ Content-Type: application/json
   "message": "User already exists"
 }
 ```
+
+### Table Management
+
+#### 1. Create Table
+
+Create a new table with QR code.
+
+POST /table
+
+##### Headers
+
+```
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+```
+
+##### Request Body
+
+```json
+{
+  "tableNumber": "T001",
+  "name": "Window Table 1",
+  "capacity": 4
+}
+```
+
+##### Response (201 Created)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "tableNumber": "T001",
+    "name": "Window Table 1",
+    "capacity": 4,
+    "isActive": true,
+    "qrCodeUrl": "https://storage.googleapis.com/h2o-qrcodes/restaurant-id/T001.png",
+    "createdAt": "2024-03-15T10:00:00.000Z",
+    "updatedAt": "2024-03-15T10:00:00.000Z"
+  }
+}
+```
+
+#### 2. Get All Tables
+
+Get a list of all tables for the restaurant.
+
+GET /table
+
+##### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+##### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+      "tableNumber": "T001",
+      "name": "Window Table 1",
+      "capacity": 4,
+      "isActive": true,
+      "qrCodeUrl": "https://storage.googleapis.com/h2o-qrcodes/restaurant-id/T001.png",
+      "createdAt": "2024-03-15T10:00:00.000Z",
+      "updatedAt": "2024-03-15T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### 3. Get Single Table
+
+Get details of a specific table.
+
+GET /table/:id
+
+##### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+##### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "tableNumber": "T001",
+    "name": "Window Table 1",
+    "capacity": 4,
+    "isActive": true,
+    "qrCodeUrl": "https://storage.googleapis.com/h2o-qrcodes/restaurant-id/T001.png",
+    "createdAt": "2024-03-15T10:00:00.000Z",
+    "updatedAt": "2024-03-15T10:00:00.000Z"
+  }
+}
+```
+
+#### 4. Update Table
+
+Update table details.
+
+PUT /table/:id
+
+##### Headers
+
+```
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+```
+
+##### Request Body
+
+```json
+{
+  "name": "Patio Table 1",
+  "capacity": 6,
+  "isActive": true
+}
+```
+
+##### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "tableNumber": "T001",
+    "name": "Patio Table 1",
+    "capacity": 6,
+    "isActive": true,
+    "qrCodeUrl": "https://storage.googleapis.com/h2o-qrcodes/restaurant-id/T001.png",
+    "createdAt": "2024-03-15T10:00:00.000Z",
+    "updatedAt": "2024-03-15T10:30:00.000Z"
+  }
+}
+```
+
+#### 5. Delete Table
+
+Delete a table and its QR code.
+
+DELETE /table/:id
+
+##### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+##### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "message": "Table deleted successfully"
+  }
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+
+```json
+{
+  "status": "error",
+  "message": "Table number already exists"
+}
+```
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to manage tables"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "Table not found"
+}
+```
+
+#### Notes
+
+- Table numbers must be unique within a restaurant
+- QR codes are automatically generated and stored in Google Cloud Storage
+- QR codes link to the table's ordering page
+- Only Restaurant_Admin users can manage tables
+- Table capacity must be between 1 and 50
+- Table names must be between 1 and 50 characters
+- Table numbers must be between 1 and 10 characters
+
+=== Registered Routes ===
+Authentication Routes:
+POST /api/v1/auth/signup # Register new restaurant admin
+POST /api/v1/auth/login # Login for restaurant admin
+POST /api/v1/auth/staff/login # Login for staff members
+POST /api/v1/auth/staff-register # Complete staff registration with invite
+
+User Routes:
+GET /api/v1/users # Get user profile
+
+Staff Management Routes:
+POST /api/v1/staff/invite # Create staff invitation
+GET /api/v1/staff # List all staff and invitations
+PUT /api/v1/staff/:id # Update staff member details
+DELETE /api/v1/staff/:id # Remove staff member or cancel invite
+
+Table Management Routes:
+POST /api/v1/table # Create new table with QR code
+GET /api/v1/table # List all restaurant tables
+GET /api/v1/table/:id # Get specific table details
+PUT /api/v1/table/:id # Update table details
+DELETE /api/v1/table/:id # Delete table and QR code
+=======================

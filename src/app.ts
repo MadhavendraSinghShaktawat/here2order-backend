@@ -10,6 +10,8 @@ import userRoutes from './modules/user/user.routes';
 import authRoutes from './modules/auth/auth.routes';
 import staffRoutes from './modules/staff/staff.routes';
 import restaurantRoutes from './modules/restaurant/restaurant.routes';
+import tableRoutes from './modules/table/table.routes';
+import path from 'path';
 
 dotenv.config();
 
@@ -69,6 +71,9 @@ apiRouter.use('/staff', staffRoutes);
 console.log('- /restaurants');
 apiRouter.use('/restaurants', restaurantRoutes);
 
+console.log('- /table');
+apiRouter.use('/table', tableRoutes);
+
 // Print all registered routes
 const printRoutes = (app: Express) => {
   const routes: Array<{ method: string; path: string }> = [];
@@ -103,6 +108,9 @@ const printRoutes = (app: Express) => {
 
 // Print routes after all routes are registered
 printRoutes(app);
+
+// Serve static files
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Error handling
 app.use(notFoundHandler);

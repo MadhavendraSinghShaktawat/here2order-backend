@@ -23,5 +23,11 @@ export const CONSTANTS = {
   JWT: {
     SECRET: process.env.JWT_SECRET || 'your-secret-key',
     EXPIRES_IN: process.env.JWT_EXPIRES_IN ? parseInt(process.env.JWT_EXPIRES_IN) : 7 * 24 * 60 * 60 // 7 days in seconds
-  }
+  },
+  GOOGLE_CLOUD: {
+    PROJECT_ID: process.env.GOOGLE_CLOUD_PROJECT_ID || '',
+    KEY_FILE: process.env.GOOGLE_CLOUD_KEY_FILE || '',
+    BUCKET_NAME: process.env.GOOGLE_CLOUD_BUCKET_NAME || ''
+  },
+  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000'
 } as const; 
