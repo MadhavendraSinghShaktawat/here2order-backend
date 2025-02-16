@@ -4,16 +4,18 @@ import crypto from 'crypto';
 import { StaffInvite } from './staff.model';
 import { User } from '../user/user.model';
 import { Restaurant } from '../restaurant/restaurant.model';
-import { StaffInviteDto, StaffResponse, IStaffInvite } from './staff.types';
+import { StaffInviteDto, StaffResponse, IStaffInvite, UpdateStaffDto } from './staff.types';
 import { AuthenticatedRequest } from '@/middlewares/types/auth.types';
 import { BadRequestError } from '@/common/errors/bad-request-error';
 import { ForbiddenError } from '@/common/errors/forbidden-error';
 import { sendStaffInviteEmail } from '@/services/email.service';
+import { NotFoundError } from '@/common/errors/not-found-error';
 
 export class StaffController {
   constructor() {
     this.inviteStaff = this.inviteStaff.bind(this);
     this.getStaff = this.getStaff.bind(this);
+    this.updateStaff = this.updateStaff.bind(this);
   }
 
   public async inviteStaff(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
@@ -148,6 +150,101 @@ export class StaffController {
       res.status(200).json({
         status: 'success',
         data: response
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async updateStaff(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      const updateData: UpdateStaffDto = req.body;
+      const currentUser = req.user;
+
+      // Validate ID
+      if (!Types.ObjectId.isValid(id)) {
+        throw new BadRequestError('Invalid staff ID');
+      }
+
+      // Check authorization
+      if (!currentUser.restaurantId) {
+        throw new ForbiddenError('Restaurant ID is required');
+      }
+
+      if (!['Restaurant_Admin'].includes(currentUser.role)) {
+        throw new ForbiddenError('Not authorized to update staff');
+      }
+
+      // Try to find staff member in User collection
+      const staffUser = await User.findOne({
+        _id: id,
+        restaurantId: currentUser.restaurantId,
+        role: 'Staff'
+      });
+
+      if (staffUser) {
+        // Update user status if provided
+        if (updateData.status) {
+          staffUser.isActive = updateData.status === 'Active';
+        }
+
+        // Update other fields
+        if (updateData.phone) staffUser.phone = updateData.phone;
+        
+        await staffUser.save();
+
+        res.status(200).json({
+          status: 'success',
+          data: {
+            id: staffUser._id.toString(),
+            email: staffUser.email,
+            name: staffUser.name,
+            phone: staffUser.phone,
+            position: 'Staff',
+            restaurantId: staffUser.restaurantId?.toString() || currentUser.restaurantId.toString(),
+            status: staffUser.isActive ? 'Active' : 'Inactive',
+            updatedAt: new Date()
+          }
+        });
+        return;
+      }
+
+      // If not found in users, check staff invites
+      const staffInvite = await StaffInvite.findOne({
+        _id: id,
+        restaurantId: currentUser.restaurantId
+      });
+
+      if (!staffInvite) {
+        throw new NotFoundError('Staff member not found');
+      }
+
+      // Update staff invite
+      if (updateData.position) staffInvite.position = updateData.position;
+      if (updateData.status) staffInvite.status = updateData.status;
+      if (updateData.phone) staffInvite.phone = updateData.phone;
+
+      await staffInvite.save();
+
+      res.status(200).json({
+        status: 'success',
+        data: {
+          id: staffInvite._id.toString(),
+          email: staffInvite.email,
+          name: staffInvite.name,
+          phone: staffInvite.phone,
+          position: staffInvite.position,
+          restaurantId: staffInvite.restaurantId.toString(),
+          status: staffInvite.status,
+          invitedBy: staffInvite.invitedBy.toString(),
+          invitedAt: staffInvite.invitedAt,
+          updatedAt: new Date()
+        }
       });
     } catch (error) {
       next(error);

@@ -33,4 +33,10 @@ export interface IStaffInvite {
   joinedAt?: Date;
   token: string;
   expiresAt: Date;
+}
+
+export interface UpdateStaffDto {
+  position?: string;
+  status?: 'Active' | 'Inactive';
+  phone?: string;
 } 

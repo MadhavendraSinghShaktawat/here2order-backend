@@ -248,9 +248,9 @@ GET /api/v1/staff
 
 ## Staff Management
 
-### Invite Staff Member
+### 1. Invite Staff Member
 
-Invite a new staff member to join the restaurant.
+Create a new staff invitation.
 
 POST /staff/invite
 
@@ -258,6 +258,7 @@ POST /staff/invite
 
 ```
 Authorization: Bearer <jwt_token>
+Content-Type: application/json
 ```
 
 #### Request Body
@@ -265,7 +266,7 @@ Authorization: Bearer <jwt_token>
 ```json
 {
   "email": "staff@example.com",
-  "name": "Staff Member",
+  "name": "John Smith",
   "phone": "+1234567890",
   "position": "Waiter"
 }
@@ -277,21 +278,20 @@ Authorization: Bearer <jwt_token>
 {
   "status": "success",
   "data": {
-    "id": "65f1a2b3c4d5e6f7g8h9i0j3",
+    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
     "email": "staff@example.com",
-    "name": "Staff Member",
+    "name": "John Smith",
     "phone": "+1234567890",
     "position": "Waiter",
     "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
     "status": "Pending",
-    "invitedBy": "65f1a2b3c4d5e6f7g8h9i0j1",
-    "invitedAt": "2024-03-15T10:30:00.000Z",
-    "joinedAt": null
+    "invitedBy": "65f1a2b3c4d5e6f7g8h9i0j3",
+    "invitedAt": "2024-03-15T10:00:00.000Z"
   }
 }
 ```
 
-### Get All Staff Members
+### 2. Get All Staff Members
 
 Get a list of all staff members and pending invites.
 
@@ -310,15 +310,15 @@ Authorization: Bearer <jwt_token>
   "status": "success",
   "data": [
     {
-      "id": "65f1a2b3c4d5e6f7g8h9i0j3",
+      "id": "65f1a2b3c4d5e6f7g8h9i0j1",
       "email": "staff@example.com",
-      "name": "Staff Member",
+      "name": "John Smith",
       "phone": "+1234567890",
       "position": "Waiter",
       "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
       "status": "Pending",
-      "invitedBy": "65f1a2b3c4d5e6f7g8h9i0j1",
-      "invitedAt": "2024-03-15T10:30:00.000Z",
+      "invitedBy": "65f1a2b3c4d5e6f7g8h9i0j3",
+      "invitedAt": "2024-03-15T10:00:00.000Z",
       "joinedAt": null
     },
     {
@@ -334,6 +334,49 @@ Authorization: Bearer <jwt_token>
       "joinedAt": "2024-03-14T10:30:00.000Z"
     }
   ]
+}
+```
+
+### 3. Update Staff Member
+
+Update a staff member's details.
+
+PUT /staff/:id
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+```
+
+#### Request Body
+
+```json
+{
+  "status": "Inactive",
+  "position": "Senior Waiter",
+  "phone": "+1234567899"
+}
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "email": "staff@example.com",
+    "name": "John Smith",
+    "phone": "+1234567899",
+    "position": "Senior Waiter",
+    "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
+    "status": "Inactive",
+    "invitedBy": "65f1a2b3c4d5e6f7g8h9i0j3",
+    "invitedAt": "2024-03-15T10:00:00.000Z",
+    "updatedAt": "2024-03-15T13:00:00.000Z"
+  }
 }
 ```
 
@@ -392,6 +435,12 @@ Authorization: Bearer <jwt_token>
 - JWT tokens expire in 7 days
 - Staff invites expire in 48 hours
 - Phone numbers should be in E.164 format
+- Only Restaurant_Admin users can manage staff
+- Staff invitations are valid for 48 hours
+- Staff members can be in one of these states:
+  - Pending: Invitation sent but not accepted
+  - Active: Staff member has joined and is active
+  - Inactive: Staff member has been deactivated
 
 === Registered Routes ===
 POST /api/v1/auth/signup
@@ -399,5 +448,5 @@ POST /api/v1/auth/login
 GET /api/v1/users
 POST /api/v1/staff/invite
 GET /api/v1/staff
-GET /api/v1/staff/test
+PUT /api/v1/staff/:id
 ========================

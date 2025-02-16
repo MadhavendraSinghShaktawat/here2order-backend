@@ -1,7 +1,7 @@
 import { Router, RequestHandler, Response, NextFunction } from 'express';
 import { StaffController } from './staff.controller';
 import { authenticate } from '@/middlewares/auth.middleware';
-import { validateStaffInvite } from './staff.validator';
+import { validateStaffInvite, validateStaffUpdate } from './staff.validator';
 import { AuthenticatedRequest } from '@/middlewares/types/auth.types';
 
 const router = Router();
@@ -48,6 +48,14 @@ console.log('- GET /');
 router.get(
   '/',
   handleRequest((req, res, next) => staffController.getStaff(req, res, next))
+);
+
+// Update staff route
+console.log('- PUT /:id');
+router.put(
+  '/:id',
+  validateStaffUpdate as RequestHandler,
+  handleRequest((req, res, next) => staffController.updateStaff(req, res, next))
 );
 
 // Add this before exporting the router
