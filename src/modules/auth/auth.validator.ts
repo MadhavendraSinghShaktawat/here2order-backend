@@ -34,6 +34,13 @@ const staffLoginSchema = z.object({
   inviteToken: z.string().optional()
 });
 
+const staffRegisterSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  inviteToken: z.string(),
+  phone: z.string().optional()
+});
+
 export const validateSignup = (req: Request, res: Response, next: NextFunction): void => {
   try {
     signupSchema.parse(req.body);
@@ -61,6 +68,18 @@ export const validateLogin = (req: Request, res: Response, next: NextFunction): 
 export const validateStaffLogin = (req: Request, res: Response, next: NextFunction): void => {
   try {
     staffLoginSchema.parse(req.body);
+    next();
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new BadRequestError(error.errors[0].message);
+    }
+    next(error);
+  }
+};
+
+export const validateStaffRegister = (req: Request, res: Response, next: NextFunction): void => {
+  try {
+    staffRegisterSchema.parse(req.body);
     next();
   } catch (error) {
     if (error instanceof z.ZodError) {

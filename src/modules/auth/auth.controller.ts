@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../user/user.model';
 import { Restaurant } from '../restaurant/restaurant.model';
-import { SignupDto, LoginDto, AuthResponse, StaffLoginDto, StaffAuthResponse } from './auth.types';
+import { SignupDto, LoginDto, AuthResponse, StaffLoginDto, StaffAuthResponse, StaffRegisterDto } from './auth.types';
 import { BadRequestError } from '@/common/errors/bad-request-error';
 import { NotFoundError } from '@/common/errors/not-found-error';
 import { CONSTANTS } from '@/config/constants';
@@ -24,6 +24,7 @@ export class AuthController {
     this.signup = this.signup.bind(this);
     this.login = this.login.bind(this);
     this.staffLogin = this.staffLogin.bind(this);
+    this.staffRegister = this.staffRegister.bind(this);
   }
 
   private generateToken(payload: TokenPayload): string {
@@ -298,6 +299,76 @@ export class AuthController {
       };
 
       res.status(200).json({
+        status: 'success',
+        data: response
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async staffRegister(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { email, password, inviteToken, phone }: StaffRegisterDto = req.body;
+
+      // Find the invitation
+      const invitation = await StaffInvitation.findOne({
+        email,
+        token: inviteToken,
+        status: 'Pending'
+      });
+
+      if (!invitation) {
+        throw new BadRequestError('Invalid or expired invitation token');
+      }
+
+      if (invitation.expiresAt < new Date()) {
+        throw new BadRequestError('Invitation has expired');
+      }
+
+      // Check if user already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        throw new BadRequestError('User already exists');
+      }
+
+      // Create new staff user
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const staffUser = await User.create({
+        email,
+        password: hashedPassword,
+        name: invitation.name,
+        role: 'Staff',
+        phone: phone || invitation.phone,
+        restaurantId: invitation.restaurantId,
+        isActive: true
+      });
+
+      // Update invitation status
+      invitation.status = 'Active';
+      invitation.joinedAt = new Date();
+      await invitation.save();
+
+      // Generate token
+      const token = this.generateToken({
+        userId: staffUser._id,
+        role: 'Staff',
+        restaurantId: invitation.restaurantId
+      });
+
+      const response: StaffAuthResponse = {
+        user: {
+          id: staffUser._id.toString(),
+          email: staffUser.email,
+          name: staffUser.name,
+          role: 'Staff',
+          restaurantId: invitation.restaurantId.toString(),
+          position: invitation.position
+        },
+        token
+      };
+
+      res.status(201).json({
         status: 'success',
         data: response
       });

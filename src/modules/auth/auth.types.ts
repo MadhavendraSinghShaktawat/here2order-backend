@@ -41,6 +41,13 @@ export interface StaffLoginDto {
   inviteToken?: string;
 }
 
+export interface StaffRegisterDto {
+  email: string;
+  password: string;
+  inviteToken: string;
+  phone?: string;
+}
+
 export interface StaffAuthResponse {
   user: {
     id: string;

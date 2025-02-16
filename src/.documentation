@@ -562,3 +562,61 @@ Content-Type: application/json
   }
 }
 ```
+
+### Staff Registration
+
+Complete staff registration with invitation token.
+
+POST /auth/staff-register
+
+#### Headers
+
+```
+Content-Type: application/json
+```
+
+#### Request Body
+
+```json
+{
+  "email": "staff@example.com",
+  "password": "Password123!",
+  "inviteToken": "abc123def456...",
+  "phone": "+1234567890" // Optional
+}
+```
+
+#### Response (201 Created)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "user": {
+      "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+      "email": "staff@example.com",
+      "name": "John Smith",
+      "role": "Staff",
+      "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
+      "position": "Waiter"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5..."
+  }
+}
+```
+
+#### Error Responses
+
+```json
+// 400 Bad Request
+{
+  "status": "error",
+  "message": "Invalid or expired invitation token"
+}
+
+// 400 Bad Request
+{
+  "status": "error",
+  "message": "User already exists"
+}
+```
