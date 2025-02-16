@@ -33,4 +33,22 @@ export interface AuthResponse {
     restaurantId: string;
   };
   token: string;
+}
+
+export interface StaffLoginDto {
+  email: string;
+  password: string;
+  inviteToken?: string;
+}
+
+export interface StaffAuthResponse {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: 'Staff';
+    restaurantId: string;
+    position: string;
+  };
+  token: string;
 } 

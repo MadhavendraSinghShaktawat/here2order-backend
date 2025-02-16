@@ -450,3 +450,53 @@ POST /api/v1/staff/invite
 GET /api/v1/staff
 PUT /api/v1/staff/:id
 ========================
+
+### Staff Login
+
+Login as a staff member or accept staff invitation.
+
+POST /auth/staff/login
+
+#### Headers
+
+```
+Content-Type: application/json
+```
+
+#### Request Body (Regular Login)
+
+```json
+{
+  "email": "staff@example.com",
+  "password": "Password123!"
+}
+```
+
+#### Request Body (First-time Login with Invitation)
+
+```json
+{
+  "email": "staff@example.com",
+  "password": "Password123!",
+  "inviteToken": "abc123def456..."
+}
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "user": {
+      "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+      "email": "staff@example.com",
+      "name": "John Smith",
+      "role": "Staff",
+      "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
+      "position": "Waiter"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5..."
+  }
+}
+```

@@ -1,19 +1,20 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-export type InvitationStatus = 'Pending' | 'Accepted' | 'Expired' | 'Cancelled';
+export type InviteStatus = 'Pending' | 'Active' | 'Inactive' | 'Expired';
 
 export interface IStaffInvitation extends Document {
   _id: Types.ObjectId;
   email: string;
+  name: string;
+  phone?: string;
+  position: string;
   restaurantId: Types.ObjectId;
+  status: InviteStatus;
   invitedBy: Types.ObjectId;
-  role: 'Staff';
-  status: InvitationStatus;
+  invitedAt: Date;
+  joinedAt?: Date;
   token: string;
   expiresAt: Date;
-  acceptedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 const staffInvitationSchema = new Schema({
@@ -24,28 +25,43 @@ const staffInvitationSchema = new Schema({
     lowercase: true,
     index: true
   },
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  phone: {
+    type: String,
+    trim: true
+  },
+  position: {
+    type: String,
+    required: true,
+    trim: true
+  },
   restaurantId: {
     type: Schema.Types.ObjectId,
     ref: 'Restaurant',
     required: true,
     index: true
   },
+  status: {
+    type: String,
+    enum: ['Pending', 'Active', 'Inactive', 'Expired'],
+    default: 'Pending',
+    required: true
+  },
   invitedBy: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  role: {
-    type: String,
-    enum: ['Staff'],
-    default: 'Staff',
-    required: true
+  invitedAt: {
+    type: Date,
+    default: Date.now
   },
-  status: {
-    type: String,
-    enum: ['Pending', 'Accepted', 'Expired', 'Cancelled'],
-    default: 'Pending',
-    required: true
+  joinedAt: {
+    type: Date
   },
   token: {
     type: String,
@@ -56,9 +72,6 @@ const staffInvitationSchema = new Schema({
     type: Date,
     required: true,
     index: true
-  },
-  acceptedAt: {
-    type: Date
   }
 }, {
   timestamps: true
@@ -67,12 +80,11 @@ const staffInvitationSchema = new Schema({
 // Indexes
 staffInvitationSchema.index({ email: 1, restaurantId: 1 }, { unique: true });
 staffInvitationSchema.index({ token: 1 }, { unique: true });
-staffInvitationSchema.index({ status: 1 });
 
 // Middleware to automatically expire invitations
 staffInvitationSchema.pre('save', function(next) {
   if (this.expiresAt < new Date() && this.status === 'Pending') {
-    this.status = 'Expired';
+    this.status = 'Expired' as InviteStatus;
   }
   next();
 });

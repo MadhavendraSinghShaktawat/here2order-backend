@@ -4,10 +4,12 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../user/user.model';
 import { Restaurant } from '../restaurant/restaurant.model';
-import { SignupDto, LoginDto, AuthResponse } from './auth.types';
+import { SignupDto, LoginDto, AuthResponse, StaffLoginDto, StaffAuthResponse } from './auth.types';
 import { BadRequestError } from '@/common/errors/bad-request-error';
 import { NotFoundError } from '@/common/errors/not-found-error';
 import { CONSTANTS } from '@/config/constants';
+import { StaffInvitation } from '../staff-invitation/staff-invitation.model';
+import { ForbiddenError } from '@/common/errors/forbidden-error';
 
 interface TokenPayload {
   userId: Types.ObjectId;
@@ -21,6 +23,7 @@ export class AuthController {
     this.generateToken = this.generateToken.bind(this);
     this.signup = this.signup.bind(this);
     this.login = this.login.bind(this);
+    this.staffLogin = this.staffLogin.bind(this);
   }
 
   private generateToken(payload: TokenPayload): string {
@@ -184,6 +187,121 @@ export class AuthController {
       });
     } catch (error) {
       console.error('Login error:', error);
+      next(error);
+    }
+  }
+
+  public async staffLogin(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { email, password, inviteToken }: StaffLoginDto = req.body;
+
+      // Check if this is a first-time login with invite token
+      if (inviteToken) {
+        const invitation = await StaffInvitation.findOne({
+          email,
+          token: inviteToken,
+          status: 'Pending'
+        });
+
+        if (!invitation) {
+          throw new BadRequestError('Invalid or expired invitation token');
+        }
+
+        if (invitation.expiresAt < new Date()) {
+          throw new BadRequestError('Invitation has expired');
+        }
+
+        // Create new staff user
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const staffUser = await User.create({
+          email,
+          password: hashedPassword,
+          name: invitation.name,
+          role: 'Staff',
+          phone: invitation.phone,
+          restaurantId: invitation.restaurantId,
+          isActive: true
+        });
+
+        // Update invitation status
+        invitation.status = 'Active';
+        invitation.joinedAt = new Date();
+        await invitation.save();
+
+        // Generate token
+        const token = this.generateToken({
+          userId: staffUser._id,
+          role: 'Staff',
+          restaurantId: invitation.restaurantId
+        });
+
+        const response: StaffAuthResponse = {
+          user: {
+            id: staffUser._id.toString(),
+            email: staffUser.email,
+            name: staffUser.name,
+            role: 'Staff',
+            restaurantId: invitation.restaurantId.toString(),
+            position: invitation.position
+          },
+          token
+        };
+
+        res.status(200).json({
+          status: 'success',
+          data: response
+        });
+        return;
+      }
+
+      // Regular staff login
+      const staffUser = await User.findOne({ 
+        email,
+        role: 'Staff'
+      }).select('+password');
+
+      if (!staffUser) {
+        throw new NotFoundError('Staff member not found');
+      }
+
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, staffUser.password);
+      if (!isPasswordValid) {
+        throw new BadRequestError('Invalid credentials');
+      }
+
+      if (!staffUser.isActive) {
+        throw new ForbiddenError('Account is inactive');
+      }
+
+      // Update last login
+      staffUser.lastLogin = new Date();
+      await staffUser.save();
+
+      // Generate token
+      const token = this.generateToken({
+        userId: staffUser._id,
+        role: 'Staff',
+        restaurantId: staffUser.restaurantId
+      });
+
+      const response: StaffAuthResponse = {
+        user: {
+          id: staffUser._id.toString(),
+          email: staffUser.email,
+          name: staffUser.name,
+          role: 'Staff',
+          restaurantId: staffUser.restaurantId?.toString() || '',
+          position: 'Staff'
+        },
+        token
+      };
+
+      res.status(200).json({
+        status: 'success',
+        data: response
+      });
+    } catch (error) {
       next(error);
     }
   }

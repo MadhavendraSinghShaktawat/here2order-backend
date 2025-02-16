@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { InviteStatus } from '../staff-invitation/staff-invitation.model';
 
 export interface StaffInviteDto {
   email: string;
@@ -14,20 +15,20 @@ export interface StaffResponse {
   phone?: string;
   position: string;
   restaurantId: string;
-  status: 'Pending' | 'Active' | 'Inactive';
+  status: InviteStatus;
   invitedBy: string;
   invitedAt: Date;
   joinedAt?: Date;
 }
 
-export interface IStaffInvite {
+export interface IStaffInvitation {
   _id: Types.ObjectId;
   email: string;
   name: string;
   phone?: string;
   position: string;
   restaurantId: Types.ObjectId;
-  status: 'Pending' | 'Active' | 'Inactive';
+  status: InviteStatus;
   invitedBy: Types.ObjectId;
   invitedAt: Date;
   joinedAt?: Date;
@@ -37,6 +38,6 @@ export interface IStaffInvite {
 
 export interface UpdateStaffDto {
   position?: string;
-  status?: 'Active' | 'Inactive';
+  status?: InviteStatus;
   phone?: string;
 } 

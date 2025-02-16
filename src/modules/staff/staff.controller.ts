@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 import crypto from 'crypto';
-import { StaffInvite } from './staff.model';
+import { StaffInvitation, InviteStatus } from '../staff-invitation/staff-invitation.model';
 import { User } from '../user/user.model';
 import { Restaurant } from '../restaurant/restaurant.model';
-import { StaffInviteDto, StaffResponse, IStaffInvite, UpdateStaffDto } from './staff.types';
+import { StaffInviteDto, StaffResponse, IStaffInvitation, UpdateStaffDto } from './staff.types';
 import { AuthenticatedRequest } from '@/middlewares/types/auth.types';
 import { BadRequestError } from '@/common/errors/bad-request-error';
 import { ForbiddenError } from '@/common/errors/forbidden-error';
@@ -39,7 +39,7 @@ export class StaffController {
       }
 
       // Check if staff already exists
-      const existingStaff = await StaffInvite.findOne({
+      const existingStaff = await StaffInvitation.findOne({
         email,
         restaurantId: currentUser.restaurantId
       });
@@ -54,7 +54,7 @@ export class StaffController {
       expiresAt.setHours(expiresAt.getHours() + 48); // Token expires in 48 hours
 
       // Create staff invite
-      const staffInvite = await StaffInvite.create({
+      const staffInvite = await StaffInvitation.create({
         email,
         name,
         phone,
@@ -74,7 +74,7 @@ export class StaffController {
         restaurantName: restaurant.name
       });
 
-      const response: StaffResponse = {
+      const response: StaffResponse & { token: string; expiresAt: Date } = {
         id: staffInvite._id.toString(),
         email: staffInvite.email,
         name: staffInvite.name,
@@ -84,7 +84,9 @@ export class StaffController {
         status: staffInvite.status,
         invitedBy: staffInvite.invitedBy.toString(),
         invitedAt: staffInvite.invitedAt,
-        joinedAt: staffInvite.joinedAt
+        joinedAt: staffInvite.joinedAt,
+        token: staffInvite.token,
+        expiresAt: staffInvite.expiresAt
       };
 
       res.status(201).json({
@@ -110,7 +112,7 @@ export class StaffController {
       }
 
       // Get all staff invites for the restaurant
-      const staffInvites = await StaffInvite.find({
+      const staffInvites = await StaffInvitation.find({
         restaurantId: currentUser.restaurantId
       }).sort({ createdAt: -1 });
 
@@ -140,7 +142,7 @@ export class StaffController {
           phone: user.phone,
           position: 'Staff',
           restaurantId: user.restaurantId!.toString(),
-          status: 'Active' as const,
+          status: user.isActive ? 'Active' as InviteStatus : 'Inactive' as InviteStatus,
           invitedBy: '',
           invitedAt: user.createdAt,
           joinedAt: user.createdAt
@@ -207,7 +209,7 @@ export class StaffController {
             phone: staffUser.phone,
             position: 'Staff',
             restaurantId: staffUser.restaurantId?.toString() || currentUser.restaurantId.toString(),
-            status: staffUser.isActive ? 'Active' : 'Inactive',
+            status: staffUser.isActive ? 'Active' as InviteStatus : 'Inactive' as InviteStatus,
             updatedAt: new Date()
           }
         });
@@ -215,7 +217,7 @@ export class StaffController {
       }
 
       // If not found in users, check staff invites
-      const staffInvite = await StaffInvite.findOne({
+      const staffInvite = await StaffInvitation.findOne({
         _id: id,
         restaurantId: currentUser.restaurantId
       });

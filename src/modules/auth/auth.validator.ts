@@ -28,6 +28,12 @@ const loginSchema = z.object({
   password: z.string()
 });
 
+const staffLoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string(),
+  inviteToken: z.string().optional()
+});
+
 export const validateSignup = (req: Request, res: Response, next: NextFunction): void => {
   try {
     signupSchema.parse(req.body);
@@ -47,6 +53,18 @@ export const validateLogin = (req: Request, res: Response, next: NextFunction): 
   } catch (error) {
     if (error instanceof z.ZodError) {
       next(new BadRequestError(error.errors[0].message));
+    }
+    next(error);
+  }
+};
+
+export const validateStaffLogin = (req: Request, res: Response, next: NextFunction): void => {
+  try {
+    staffLoginSchema.parse(req.body);
+    next();
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new BadRequestError(error.errors[0].message);
     }
     next(error);
   }
