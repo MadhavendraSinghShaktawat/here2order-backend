@@ -131,3 +131,7 @@ dist
 
 # Uploads
 uploads/
+
+# Google Cloud credentials
+src/config/google-cloud-key.json
+google-cloud-key.json
