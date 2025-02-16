@@ -16,6 +16,7 @@ export class StaffController {
     this.inviteStaff = this.inviteStaff.bind(this);
     this.getStaff = this.getStaff.bind(this);
     this.updateStaff = this.updateStaff.bind(this);
+    this.deleteStaff = this.deleteStaff.bind(this);
   }
 
   public async inviteStaff(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
@@ -246,6 +247,76 @@ export class StaffController {
           invitedBy: staffInvite.invitedBy.toString(),
           invitedAt: staffInvite.invitedAt,
           updatedAt: new Date()
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async deleteStaff(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const currentUser = req.user;
+
+      // Validate ID
+      if (!Types.ObjectId.isValid(id)) {
+        throw new BadRequestError('Invalid staff ID');
+      }
+
+      // Check authorization
+      if (!currentUser.restaurantId) {
+        throw new ForbiddenError('Restaurant ID is required');
+      }
+
+      if (!['Restaurant_Admin'].includes(currentUser.role)) {
+        throw new ForbiddenError('Not authorized to delete staff');
+      }
+
+      // Try to find staff member in User collection
+      const staffUser = await User.findOne({
+        _id: id,
+        restaurantId: currentUser.restaurantId,
+        role: 'Staff'
+      });
+
+      if (staffUser) {
+        // Soft delete by marking as inactive
+        staffUser.isActive = false;
+        await staffUser.save();
+
+        res.status(200).json({
+          status: 'success',
+          data: {
+            id: staffUser._id.toString(),
+            email: staffUser.email,
+            name: staffUser.name,
+            message: 'Staff member deactivated successfully'
+          }
+        });
+        return;
+      }
+
+      // If not found in users, check staff invites
+      const staffInvite = await StaffInvitation.findOne({
+        _id: id,
+        restaurantId: currentUser.restaurantId
+      });
+
+      if (!staffInvite) {
+        throw new NotFoundError('Staff member not found');
+      }
+
+      // For invitations, we can do a hard delete
+      await StaffInvitation.deleteOne({ _id: id });
+
+      res.status(200).json({
+        status: 'success',
+        data: {
+          id: staffInvite._id.toString(),
+          email: staffInvite.email,
+          name: staffInvite.name,
+          message: 'Staff invitation deleted successfully'
         }
       });
     } catch (error) {

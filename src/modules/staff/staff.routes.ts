@@ -58,6 +58,10 @@ router.put(
   handleRequest((req, res, next) => staffController.updateStaff(req, res, next))
 );
 
+// Delete staff route
+console.log('- DELETE /:id');
+router.delete('/:id', handleRequest((req, res, next) => staffController.deleteStaff(req, res, next)));
+
 // Add this before exporting the router
 router.get('/test', (req, res) => {
   res.json({ message: 'Staff router is working' });

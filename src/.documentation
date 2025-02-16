@@ -380,6 +380,67 @@ Content-Type: application/json
 }
 ```
 
+### Delete Staff Member
+
+Delete a staff member or cancel an invitation.
+
+DELETE /staff/:id
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Parameters
+
+```
+id: Staff member or invitation ID
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "67b1f98277fc25672dfd8276",
+    "email": "staff@example.com",
+    "name": "Staff Member",
+    "message": "Staff member deactivated successfully"
+    // or "Staff invitation deleted successfully"
+  }
+}
+```
+
+#### Error Responses
+
+```json
+// 400 Bad Request
+{
+  "status": "error",
+  "message": "Invalid staff ID"
+}
+
+// 401 Unauthorized
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+
+// 403 Forbidden
+{
+  "status": "error",
+  "message": "Not authorized to delete staff"
+}
+
+// 404 Not Found
+{
+  "status": "error",
+  "message": "Staff member not found"
+}
+```
+
 ## Error Responses
 
 ### 400 Bad Request
@@ -449,6 +510,7 @@ GET /api/v1/users
 POST /api/v1/staff/invite
 GET /api/v1/staff
 PUT /api/v1/staff/:id
+DELETE /api/v1/staff/:id
 ========================
 
 ### Staff Login
