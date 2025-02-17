@@ -1336,3 +1336,578 @@ Menu Routes:
 POST /api/v1/menu/categories # Create new menu category
 GET /api/v1/menu/categories/:restaurantId # Get all menu categories
 ...
+
+======================================================================
+
+### Delete Menu Category
+
+Delete a menu category.
+
+DELETE /menu/categories/:categoryId
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Parameters
+
+```
+categoryId: ID of the category to delete
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "message": "Category deleted successfully"
+  }
+}
+```
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to delete this category"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "Category not found"
+}
+```
+
+#### Notes
+
+- Only Restaurant_Admin can delete categories
+- Can only delete categories from own restaurant
+- Deleting a category is permanent
+- # Should ensure no menu items are using this category before deletion
+
+=== Registered Routes ===
+...
+Menu Routes:
+POST /api/v1/menu/categories # Create new menu category
+GET /api/v1/menu/categories/:restaurantId # Get all menu categories
+DELETE /api/v1/menu/categories/:categoryId # Delete a menu category
+...
+
+======================================================================
+
+### Create Menu Item
+
+Create a new menu item.
+
+POST /menu/items
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Request Body
+
+```json
+{
+  "name": "Margherita Pizza",
+  "description": "Fresh tomatoes, mozzarella, basil, and olive oil",
+  "price": 12.99,
+  "categoryId": "65f1a2b3c4d5e6f7g8h9i0j1",
+  "imageUrl": "https://example.com/images/margherita.jpg",
+  "isActive": true,
+  "isAvailable": true,
+  "preparationTime": 15,
+  "sortOrder": 1
+}
+```
+
+#### Response (201 Created)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j2",
+    "name": "Margherita Pizza",
+    "description": "Fresh tomatoes, mozzarella, basil, and olive oil",
+    "price": 12.99,
+    "categoryId": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j3",
+    "imageUrl": "https://example.com/images/margherita.jpg",
+    "isActive": true,
+    "isAvailable": true,
+    "preparationTime": 15,
+    "sortOrder": 1,
+    "createdAt": "2024-03-15T10:00:00.000Z",
+    "updatedAt": "2024-03-15T10:00:00.000Z"
+  }
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+
+```json
+{
+  "status": "error",
+  "message": "An item with this name already exists"
+}
+```
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to perform this action"
+}
+```
+
+#### Notes
+
+- Only Restaurant_Admin can create menu items
+- Item names must be unique within a restaurant
+- Category must exist and belong to the restaurant
+- Price must be non-negative
+- Sort order is auto-assigned if not provided
+- Items are active and available by default
+- Preparation time is optional and in minutes
+- # Image URL must be a valid URL
+
+=== Registered Routes ===
+...
+Menu Routes:
+POST /api/v1/menu/categories # Create new menu category
+GET /api/v1/menu/categories/:restaurantId # Get all menu categories
+DELETE /api/v1/menu/categories/:categoryId # Delete a menu category
+POST /api/v1/menu/items # Create new menu item
+...
+
+======================================================================
+
+### Get Menu Items
+
+Get all menu items for a restaurant.
+
+GET /menu/items/:restaurantId
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Parameters
+
+```
+restaurantId: ID of the restaurant
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "items": [
+      {
+        "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+        "name": "Margherita Pizza",
+        "description": "Fresh tomatoes, mozzarella, basil, and olive oil",
+        "price": 12.99,
+        "categoryId": "65f1a2b3c4d5e6f7g8h9i0j2",
+        "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j3",
+        "imageUrl": "https://example.com/images/margherita.jpg",
+        "isActive": true,
+        "isAvailable": true,
+        "preparationTime": 15,
+        "sortOrder": 1,
+        "createdAt": "2024-03-15T10:00:00.000Z",
+        "updatedAt": "2024-03-15T10:00:00.000Z"
+      }
+      // ... other items
+    ]
+  }
+}
+```
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to access this restaurant"
+}
+```
+
+#### Notes
+
+- Accessible by Restaurant_Admin, Staff, and Customer roles
+- Items are sorted by category and then by sort order
+- Customers only see active items
+- Staff and Admin see all items
+- Includes category information
+- # Supports filtering by availability
+
+=== Registered Routes ===
+...
+Menu Routes:
+POST /api/v1/menu/categories # Create new menu category
+GET /api/v1/menu/categories/:restaurantId # Get all menu categories
+DELETE /api/v1/menu/categories/:categoryId # Delete a menu category
+POST /api/v1/menu/items # Create new menu item
+GET /api/v1/menu/items/:restaurantId # Get all menu items
+...
+
+======================================================================
+
+### Update Menu Item
+
+Update menu item details.
+
+PUT /menu/items/:itemId
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Parameters
+
+```
+itemId: ID of the menu item to update
+```
+
+#### Request Body
+
+```json
+{
+  "name": "Updated Pizza Name",
+  "description": "Updated description",
+  "price": 14.99,
+  "categoryId": "65f1a2b3c4d5e6f7g8h9i0j1",
+  "imageUrl": "https://example.com/images/updated.jpg",
+  "isActive": true,
+  "isAvailable": true,
+  "preparationTime": 20,
+  "sortOrder": 2
+}
+```
+
+All fields are optional, but at least one must be provided.
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j2",
+    "name": "Updated Pizza Name",
+    "description": "Updated description",
+    "price": 14.99,
+    "categoryId": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j3",
+    "imageUrl": "https://example.com/images/updated.jpg",
+    "isActive": true,
+    "isAvailable": true,
+    "preparationTime": 20,
+    "sortOrder": 2,
+    "createdAt": "2024-03-15T10:00:00.000Z",
+    "updatedAt": "2024-03-15T10:30:00.000Z"
+  }
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+
+```json
+{
+  "status": "error",
+  "message": "An item with this name already exists"
+}
+```
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to update this menu item"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "Menu item not found"
+}
+```
+
+#### Notes
+
+- Only Restaurant_Admin can update menu items
+- Can only update items from own restaurant
+- Item names must remain unique within restaurant
+- Category must exist and belong to restaurant
+- At least one field must be provided for update
+- All fields are optional
+- # Price must be non-negative if provided
+
+=== Registered Routes ===
+...
+Menu Routes:
+POST /api/v1/menu/categories # Create new menu category
+GET /api/v1/menu/categories/:restaurantId # Get all menu categories
+DELETE /api/v1/menu/categories/:categoryId # Delete a menu category
+POST /api/v1/menu/items # Create new menu item
+GET /api/v1/menu/items/:restaurantId # Get all menu items
+PUT /api/v1/menu/items/:itemId # Update menu item
+...
+
+======================================================================
+
+### Delete Menu Item
+
+Delete a menu item.
+
+DELETE /menu/items/:itemId
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Parameters
+
+```
+itemId: ID of the menu item to delete
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "message": "Menu item deleted successfully"
+  }
+}
+```
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to delete this menu item"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "Menu item not found"
+}
+```
+
+#### Notes
+
+- Only Restaurant_Admin can delete menu items
+- Can only delete items from own restaurant
+- Deletion is permanent
+- # Should ensure no active orders contain this item
+
+=== Registered Routes ===
+...
+Menu Routes:
+POST /api/v1/menu/categories # Create new menu category
+GET /api/v1/menu/categories/:restaurantId # Get all menu categories
+DELETE /api/v1/menu/categories/:categoryId # Delete a menu category
+POST /api/v1/menu/items # Create new menu item
+GET /api/v1/menu/items/:restaurantId # Get all menu items
+PUT /api/v1/menu/items/:itemId # Update menu item
+DELETE /api/v1/menu/items/:itemId # Delete menu item
+...
+
+======================================================================
+
+### Toggle Menu Item Availability
+
+Toggle the availability status of a menu item.
+
+PUT /menu/items/:itemId/availability
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Parameters
+
+```
+itemId: ID of the menu item to update
+```
+
+#### Request Body
+
+```json
+{
+  "isAvailable": true
+}
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "name": "Margherita Pizza",
+    "description": "Fresh tomatoes, mozzarella, basil, and olive oil",
+    "price": 12.99,
+    "categoryId": "65f1a2b3c4d5e6f7g8h9i0j2",
+    "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j3",
+    "imageUrl": "https://example.com/images/margherita.jpg",
+    "isActive": true,
+    "isAvailable": true,
+    "preparationTime": 15,
+    "sortOrder": 1,
+    "createdAt": "2024-03-15T10:00:00.000Z",
+    "updatedAt": "2024-03-15T10:30:00.000Z"
+  }
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+
+```json
+{
+  "status": "error",
+  "message": "isAvailable is required"
+}
+```
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to update this menu item"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "Menu item not found"
+}
+```
+
+#### Notes
+
+- Both Restaurant_Admin and Staff can toggle item availability
+- Can only update items from own restaurant
+- Useful for quickly marking items as out of stock
+- Does not affect the item's active status
+- # Customers will still see the item but marked as unavailable
+
+=== Registered Routes ===
+...
+Menu Routes:
+POST /api/v1/menu/categories # Create new menu category
+GET /api/v1/menu/categories/:restaurantId # Get all menu categories
+DELETE /api/v1/menu/categories/:categoryId # Delete a menu category
+POST /api/v1/menu/items # Create new menu item
+GET /api/v1/menu/items/:restaurantId # Get all menu items
+PUT /api/v1/menu/items/:itemId # Update menu item
+DELETE /api/v1/menu/items/:itemId # Delete menu item
+PUT /api/v1/menu/items/:itemId/availability # Toggle item availability
+...

@@ -2,7 +2,7 @@ import { Router, RequestHandler, Response, NextFunction } from 'express';
 import { MenuController } from './menu.controller';
 import { authenticate } from '@/middlewares/auth.middleware';
 import { authorize } from '@/middlewares/authorize.middleware';
-import { validateCreateMenuCategory } from './menu.validator';
+import { validateCreateMenuCategory, validateCreateMenuItem, validateUpdateMenuItem, validateToggleItemAvailability } from './menu.validator';
 import { AuthenticatedRequest } from '@/middlewares/types/auth.types';
 
 const router = Router();
@@ -39,6 +39,57 @@ router.get(
   authenticate as RequestHandler,
   authorize(['Restaurant_Admin', 'Staff', 'Customer']) as RequestHandler,
   handleRequest((req, res, next) => menuController.getCategories(req, res, next))
+);
+
+// Add delete category route
+router.delete(
+  '/categories/:categoryId',
+  authenticate as RequestHandler,
+  authorize(['Restaurant_Admin']) as RequestHandler,
+  handleRequest((req, res, next) => menuController.deleteCategory(req, res, next))
+);
+
+// Add create menu item route
+router.post(
+  '/items',
+  authenticate as RequestHandler,
+  authorize(['Restaurant_Admin']) as RequestHandler,
+  validateCreateMenuItem,
+  handleRequest((req, res, next) => menuController.createMenuItem(req, res, next))
+);
+
+// Add get menu items route
+router.get(
+  '/items/:restaurantId',
+  authenticate as RequestHandler,
+  authorize(['Restaurant_Admin', 'Staff', 'Customer']) as RequestHandler,
+  handleRequest((req, res, next) => menuController.getMenuItems(req, res, next))
+);
+
+// Add update menu item route
+router.put(
+  '/items/:itemId',
+  authenticate as RequestHandler,
+  authorize(['Restaurant_Admin']) as RequestHandler,
+  validateUpdateMenuItem,
+  handleRequest((req, res, next) => menuController.updateMenuItem(req, res, next))
+);
+
+// Add delete menu item route
+router.delete(
+  '/items/:itemId',
+  authenticate as RequestHandler,
+  authorize(['Restaurant_Admin']) as RequestHandler,
+  handleRequest((req, res, next) => menuController.deleteMenuItem(req, res, next))
+);
+
+// Add toggle item availability route
+router.put(
+  '/items/:itemId/availability',
+  authenticate as RequestHandler,
+  authorize(['Restaurant_Admin', 'Staff']) as RequestHandler,
+  validateToggleItemAvailability,
+  handleRequest((req, res, next) => menuController.toggleItemAvailability(req, res, next))
 );
 
 export default router; 
