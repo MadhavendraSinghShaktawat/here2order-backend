@@ -58,4 +58,8 @@ export interface StaffAuthResponse {
     position: string;
   };
   token: string;
+}
+
+export interface LogoutResponse {
+  message: string;
 } 

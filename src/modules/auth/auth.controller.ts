@@ -4,12 +4,13 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../user/user.model';
 import { Restaurant } from '../restaurant/restaurant.model';
-import { SignupDto, LoginDto, AuthResponse, StaffLoginDto, StaffAuthResponse, StaffRegisterDto } from './auth.types';
+import { SignupDto, LoginDto, AuthResponse, StaffLoginDto, StaffAuthResponse, StaffRegisterDto, LogoutResponse } from './auth.types';
 import { BadRequestError } from '@/common/errors/bad-request-error';
 import { NotFoundError } from '@/common/errors/not-found-error';
 import { CONSTANTS } from '@/config/constants';
 import { StaffInvitation } from '../staff-invitation/staff-invitation.model';
 import { ForbiddenError } from '@/common/errors/forbidden-error';
+import { AuthenticatedRequest } from '@/middlewares/types/auth.types';
 
 interface TokenPayload {
   userId: Types.ObjectId;
@@ -25,6 +26,7 @@ export class AuthController {
     this.login = this.login.bind(this);
     this.staffLogin = this.staffLogin.bind(this);
     this.staffRegister = this.staffRegister.bind(this);
+    this.logout = this.logout.bind(this);
   }
 
   private generateToken(payload: TokenPayload): string {
@@ -369,6 +371,28 @@ export class AuthController {
       };
 
       res.status(201).json({
+        status: 'success',
+        data: response
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async logout(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const currentUser = req.user;
+
+      // Update last logout time
+      await User.findByIdAndUpdate(currentUser._id, {
+        lastLogin: new Date()
+      });
+
+      const response: LogoutResponse = {
+        message: 'Logged out successfully'
+      };
+
+      res.status(200).json({
         status: 'success',
         data: response
       });

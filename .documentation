@@ -509,6 +509,7 @@ POST /api/v1/auth/signup # Register new restaurant admin
 POST /api/v1/auth/login # Login for restaurant admin
 POST /api/v1/auth/staff/login # Login for staff members
 POST /api/v1/auth/staff-register # Complete staff registration with invite
+POST /api/v1/auth/logout # Logout current user
 
 User Routes:
 GET /api/v1/users # Get user profile
@@ -859,6 +860,7 @@ POST /api/v1/auth/signup # Register new restaurant admin
 POST /api/v1/auth/login # Login for restaurant admin
 POST /api/v1/auth/staff/login # Login for staff members
 POST /api/v1/auth/staff-register # Complete staff registration with invite
+POST /api/v1/auth/logout # Logout current user
 
 User Routes:
 GET /api/v1/users # Get user profile
@@ -876,3 +878,54 @@ GET /api/v1/table/:id # Get specific table details
 PUT /api/v1/table/:id # Update table details
 DELETE /api/v1/table/:id # Delete table and QR code
 =======================
+
+======================================================================
+
+### Logout
+
+Logout the currently authenticated user.
+
+POST /auth/logout
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Logged out successfully"
+  }
+}
+```
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "No token provided"
+}
+```
+
+or
+
+```json
+{
+  "status": "error",
+  "message": "Invalid token"
+}
+```
+
+#### Notes
+
+- Requires a valid JWT token in the Authorization header
+- Updates the user's last login timestamp
+- # The client should remove the token from local storage after logout

@@ -1,9 +1,28 @@
-import { Router } from 'express';
+import { Router, RequestHandler, Response, NextFunction } from 'express';
 import { AuthController } from './auth.controller';
+import { authenticate } from '@/middlewares/auth.middleware';
 import { validateSignup, validateLogin, validateStaffLogin, validateStaffRegister } from './auth.validator';
+import { AuthenticatedRequest } from '@/middlewares/types/auth.types';
 
 const router = Router();
 const authController = new AuthController();
+
+// Create wrapper for type conversion
+const handleRequest = (
+  handler: (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>
+): RequestHandler => {
+  return async (req, res, next) => {
+    try {
+      await handler(req as AuthenticatedRequest, res, next);
+    } catch (error) {
+      next(error);
+    }
+  };
+};
 
 // TODO: Implement auth routes
 router.post('/signup', validateSignup, (req, res, next) => authController.signup(req, res, next));
@@ -15,6 +34,13 @@ router.post(
   '/staff-register',
   validateStaffRegister,
   (req, res, next) => authController.staffRegister(req, res, next)
+);
+
+// Add logout route with proper type handling
+router.post(
+  '/logout', 
+  authenticate as RequestHandler,
+  handleRequest((req, res, next) => authController.logout(req, res, next))
 );
 
 export default router; 
