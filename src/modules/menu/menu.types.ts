@@ -14,4 +14,8 @@ export interface MenuCategoryResponse {
   restaurantId: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface MenuCategoryListResponse {
+  categories: MenuCategoryResponse[];
 } 

@@ -1256,4 +1256,83 @@ Authorization: Bearer <jwt_token>
 ...
 Menu Routes:
 POST /api/v1/menu/categories # Create new menu category
+GET /api/v1/menu/categories/:restaurantId # Get all menu categories
+...
+
+======================================================================
+
+### Get Menu Categories
+
+Get all menu categories for a restaurant.
+
+GET /menu/categories/:restaurantId
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Parameters
+
+```
+restaurantId: ID of the restaurant
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "categories": [
+      {
+        "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+        "name": "Main Course",
+        "description": "Primary dishes served as the main meal",
+        "isActive": true,
+        "sortOrder": 1,
+        "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
+        "createdAt": "2024-03-15T10:00:00.000Z",
+        "updatedAt": "2024-03-15T10:00:00.000Z"
+      }
+      // ... other categories
+    ]
+  }
+}
+```
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to access this restaurant"
+}
+```
+
+#### Notes
+
+- Accessible by Restaurant_Admin, Staff, and Customer roles
+- Categories are sorted by sortOrder
+- Customers only see active categories
+- Staff and Admin see all categories
+- # Requires authentication
+
+=== Registered Routes ===
+...
+Menu Routes:
+POST /api/v1/menu/categories # Create new menu category
+GET /api/v1/menu/categories/:restaurantId # Get all menu categories
 ...

@@ -15,6 +15,7 @@ export interface IUser extends Document {
   updatedAt: Date;
   deviceId?: string;
   tableId?: Types.ObjectId;
+  canAccessRestaurant(restaurantId: string): boolean;
 }
 
 const userSchema = new Schema({
@@ -83,7 +84,18 @@ userSchema.index({ deviceId: 1, restaurantId: 1 }, { sparse: true });
 
 // Methods
 userSchema.methods.canAccessRestaurant = function(restaurantId: string): boolean {
+  console.log('Checking restaurant access:', {
+    userRole: this.role,
+    userRestaurantId: this.restaurantId?.toString(),
+    requestedRestaurantId: restaurantId
+  });
+
   if (this.role === 'SuperAdmin') return true;
+  if (this.role === 'Customer') {
+    // Customers can access the restaurant they're currently in
+    return this.restaurantId?.toString() === restaurantId;
+  }
+  // Staff and Restaurant_Admin can only access their assigned restaurant
   return this.restaurantId?.toString() === restaurantId;
 };
 

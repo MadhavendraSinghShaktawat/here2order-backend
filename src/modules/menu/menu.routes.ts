@@ -33,4 +33,12 @@ router.post(
   handleRequest((req, res, next) => menuController.createCategory(req, res, next))
 );
 
+// Add get categories route
+router.get(
+  '/categories/:restaurantId',
+  authenticate as RequestHandler,
+  authorize(['Restaurant_Admin', 'Staff', 'Customer']) as RequestHandler,
+  handleRequest((req, res, next) => menuController.getCategories(req, res, next))
+);
+
 export default router; 
