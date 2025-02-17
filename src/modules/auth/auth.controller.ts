@@ -4,13 +4,14 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../user/user.model';
 import { Restaurant } from '../restaurant/restaurant.model';
-import { SignupDto, LoginDto, AuthResponse, StaffLoginDto, StaffAuthResponse, StaffRegisterDto, LogoutResponse } from './auth.types';
+import { SignupDto, LoginDto, AuthResponse, StaffLoginDto, StaffAuthResponse, StaffRegisterDto, LogoutResponse, CurrentUserResponse, QRLoginDto, QRLoginResponse } from './auth.types';
 import { BadRequestError } from '@/common/errors/bad-request-error';
 import { NotFoundError } from '@/common/errors/not-found-error';
 import { CONSTANTS } from '@/config/constants';
 import { StaffInvitation } from '../staff-invitation/staff-invitation.model';
 import { ForbiddenError } from '@/common/errors/forbidden-error';
 import { AuthenticatedRequest } from '@/middlewares/types/auth.types';
+import { Table } from '../table/table.model';
 
 interface TokenPayload {
   userId: Types.ObjectId;
@@ -27,6 +28,8 @@ export class AuthController {
     this.staffLogin = this.staffLogin.bind(this);
     this.staffRegister = this.staffRegister.bind(this);
     this.logout = this.logout.bind(this);
+    this.getCurrentUser = this.getCurrentUser.bind(this);
+    this.qrLogin = this.qrLogin.bind(this);
   }
 
   private generateToken(payload: TokenPayload): string {
@@ -390,6 +393,107 @@ export class AuthController {
 
       const response: LogoutResponse = {
         message: 'Logged out successfully'
+      };
+
+      res.status(200).json({
+        status: 'success',
+        data: response
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async getCurrentUser(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const currentUser = req.user;
+
+      // Get fresh user data from database
+      const user = await User.findById(currentUser._id);
+      if (!user) {
+        throw new NotFoundError('User not found');
+      }
+
+      const response: CurrentUserResponse = {
+        id: user._id.toString(),
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        phone: user.phone,
+        restaurantId: user.restaurantId?.toString(),
+        isActive: user.isActive,
+        lastLogin: user.lastLogin,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      };
+
+      res.status(200).json({
+        status: 'success',
+        data: response
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async qrLogin(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { tableId, deviceId }: QRLoginDto = req.body;
+
+      // Find table
+      const table = await Table.findById(tableId);
+      if (!table) {
+        throw new NotFoundError('Table not found');
+      }
+
+      // Check if restaurant is active
+      const restaurant = await Restaurant.findById(table.restaurantId);
+      if (!restaurant || !restaurant.isActive) {
+        throw new BadRequestError('Restaurant is not active');
+      }
+
+      // Create or find customer user
+      let user = await User.findOne({
+        deviceId,
+        role: 'Customer',
+        restaurantId: table.restaurantId
+      });
+
+      if (!user) {
+        // Create new customer user
+        user = await User.create({
+          deviceId,
+          role: 'Customer',
+          restaurantId: table.restaurantId,
+          isActive: true,
+          name: `Guest-${deviceId.slice(-6)}` // Create a guest name using last 6 chars of deviceId
+        });
+      }
+
+      // Update last login and table
+      user.lastLogin = new Date();
+      user.tableId = table._id;
+      await user.save();
+
+      // Generate token
+      const token = this.generateToken({
+        userId: user._id,
+        role: 'Customer',
+        restaurantId: table.restaurantId
+      });
+
+      const response: QRLoginResponse = {
+        user: {
+          id: user._id.toString(),
+          role: 'Customer',
+          tableId: table._id.toString(),
+          restaurantId: table.restaurantId.toString()
+        },
+        token,
+        table: {
+          number: table.tableNumber,
+          name: table.name
+        }
       };
 
       res.status(200).json({

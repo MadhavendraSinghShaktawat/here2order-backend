@@ -1,7 +1,7 @@
 import { Router, RequestHandler, Response, NextFunction } from 'express';
 import { AuthController } from './auth.controller';
 import { authenticate } from '@/middlewares/auth.middleware';
-import { validateSignup, validateLogin, validateStaffLogin, validateStaffRegister } from './auth.validator';
+import { validateSignup, validateLogin, validateStaffLogin, validateStaffRegister, validateQRLogin } from './auth.validator';
 import { AuthenticatedRequest } from '@/middlewares/types/auth.types';
 
 const router = Router();
@@ -41,6 +41,20 @@ router.post(
   '/logout', 
   authenticate as RequestHandler,
   handleRequest((req, res, next) => authController.logout(req, res, next))
+);
+
+// Add current user route
+router.get(
+  '/me',
+  authenticate as RequestHandler,
+  handleRequest((req, res, next) => authController.getCurrentUser(req, res, next))
+);
+
+// Add QR login route
+router.post(
+  '/qr-login',
+  validateQRLogin,
+  (req, res, next) => authController.qrLogin(req, res, next)
 );
 
 export default router; 

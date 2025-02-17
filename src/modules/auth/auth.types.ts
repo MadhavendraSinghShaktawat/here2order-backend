@@ -62,4 +62,36 @@ export interface StaffAuthResponse {
 
 export interface LogoutResponse {
   message: string;
+}
+
+export interface CurrentUserResponse {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  phone?: string;
+  restaurantId?: string;
+  isActive: boolean;
+  lastLogin?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface QRLoginDto {
+  tableId: string;
+  deviceId: string;
+}
+
+export interface QRLoginResponse {
+  user: {
+    id: string;
+    role: 'Customer';
+    tableId: string;
+    restaurantId: string;
+  };
+  token: string;
+  table: {
+    number: string;
+    name: string;
+  };
 } 

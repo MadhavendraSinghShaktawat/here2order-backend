@@ -929,3 +929,331 @@ or
 - Requires a valid JWT token in the Authorization header
 - Updates the user's last login timestamp
 - # The client should remove the token from local storage after logout
+
+======================================================================
+
+### Get Current User
+
+Get the currently authenticated user's details.
+
+GET /auth/me
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "role": "Restaurant_Admin",
+    "phone": "+1234567890",
+    "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
+    "isActive": true,
+    "lastLogin": "2024-03-15T10:00:00.000Z",
+    "createdAt": "2024-03-01T10:00:00.000Z",
+    "updatedAt": "2024-03-15T10:00:00.000Z"
+  }
+}
+```
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "No token provided"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "User not found"
+}
+```
+
+#### Notes
+
+- Requires a valid JWT token in the Authorization header
+- Returns fresh user data from the database
+- # Includes all non-sensitive user information
+
+=== Registered Routes ===
+Authentication Routes:
+...
+GET /api/v1/auth/me # Get current user profile
+...
+
+======================================================================
+
+### Scan QR Code
+
+Get restaurant and table details from a QR code.
+
+GET /qr/scan/:code
+
+#### Parameters
+
+```
+code: Table ID from QR code
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "restaurant": {
+      "id": "65f1a2b3c4d5e6f7g8h9i0j2",
+      "name": "The Great Restaurant",
+      "address": {
+        "street": "123 Main St",
+        "city": "New York",
+        "state": "NY",
+        "postalCode": "10001",
+        "country": "USA"
+      },
+      "contact": {
+        "phone": "+1234567890",
+        "email": "contact@restaurant.com"
+      },
+      "businessHours": [
+        {
+          "day": "Monday",
+          "open": "09:00",
+          "close": "22:00",
+          "isClosed": false
+        }
+        // ... other days
+      ],
+      "settings": {
+        "currency": "USD",
+        "language": "en",
+        "timezone": "UTC"
+      },
+      "isCurrentlyOpen": true
+    },
+    "table": {
+      "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+      "number": "T001",
+      "name": "Window Table 1",
+      "capacity": 4
+    }
+  }
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+
+```json
+{
+  "status": "error",
+  "message": "QR code is required"
+}
+```
+
+or
+
+```json
+{
+  "status": "error",
+  "message": "Restaurant is currently not active"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "Invalid QR code"
+}
+```
+
+or
+
+```json
+{
+  "status": "error",
+  "message": "Restaurant not found"
+}
+```
+
+#### Notes
+
+- No authentication required
+- Returns current restaurant status (open/closed)
+- Checks business hours for current day
+- # Returns all necessary information for menu display
+
+=== Registered Routes ===
+...
+QR Code Routes:
+GET /api/v1/qr/scan/:code # Get restaurant details from QR code
+...
+
+======================================================================
+
+### QR Login
+
+Login or create a customer account after scanning a QR code.
+
+POST /auth/qr-login
+
+#### Request Body
+
+```json
+{
+  "tableId": "65f1a2b3c4d5e6f7g8h9i0j1",
+  "deviceId": "device-unique-identifier"
+}
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "user": {
+      "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+      "role": "Customer",
+      "tableId": "65f1a2b3c4d5e6f7g8h9i0j2",
+      "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j3"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5...",
+    "table": {
+      "number": "T001",
+      "name": "Window Table 1"
+    }
+  }
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+
+```json
+{
+  "status": "error",
+  "message": "Restaurant is not active"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "Table not found"
+}
+```
+
+#### Notes
+
+- Creates a new customer user if device ID is not found
+- Updates existing customer's table if device ID exists
+- Generates a JWT token for API access
+- # No password required for customer login
+
+======================================================================
+
+### Create Menu Category
+
+Create a new menu category for the restaurant.
+
+POST /menu/categories
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Request Body
+
+```json
+{
+  "name": "Main Course",
+  "description": "Primary dishes served as the main meal",
+  "isActive": true,
+  "sortOrder": 1
+}
+```
+
+#### Response (201 Created)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "name": "Main Course",
+    "description": "Primary dishes served as the main meal",
+    "isActive": true,
+    "sortOrder": 1,
+    "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
+    "createdAt": "2024-03-15T10:00:00.000Z",
+    "updatedAt": "2024-03-15T10:00:00.000Z"
+  }
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+
+```json
+{
+  "status": "error",
+  "message": "A category with this name already exists"
+}
+```
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to perform this action"
+}
+```
+
+#### Notes
+
+- Requires Restaurant_Admin role
+- Category names must be unique within a restaurant
+- Sort order is auto-assigned if not provided
+- Description is optional
+- # Categories are active by default
+
+=== Registered Routes ===
+...
+Menu Routes:
+POST /api/v1/menu/categories # Create new menu category
+...

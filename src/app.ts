@@ -11,6 +11,8 @@ import authRoutes from './modules/auth/auth.routes';
 import staffRoutes from './modules/staff/staff.routes';
 import restaurantRoutes from './modules/restaurant/restaurant.routes';
 import tableRoutes from './modules/table/table.routes';
+import qrRoutes from './modules/qr/qr.routes';
+import menuRoutes from './modules/menu/menu.routes';
 import path from 'path';
 
 dotenv.config();
@@ -73,6 +75,12 @@ apiRouter.use('/restaurants', restaurantRoutes);
 
 console.log('- /table');
 apiRouter.use('/table', tableRoutes);
+
+console.log('- /qr');
+apiRouter.use('/qr', qrRoutes);
+
+console.log('- /menu');
+apiRouter.use('/menu', menuRoutes);
 
 // Print all registered routes
 const printRoutes = (app: Express) => {

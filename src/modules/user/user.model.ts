@@ -13,19 +13,26 @@ export interface IUser extends Document {
   lastLogin?: Date;
   createdAt: Date;
   updatedAt: Date;
+  deviceId?: string;
+  tableId?: Types.ObjectId;
 }
 
 const userSchema = new Schema({
   email: {
     type: String,
-    required: true,
+    required: function(this: IUser) {
+      return ['SuperAdmin', 'Restaurant_Admin', 'Staff'].includes(this.role);
+    },
     unique: true,
+    sparse: true,
     trim: true,
     lowercase: true
   },
   password: {
     type: String,
-    required: true,
+    required: function(this: IUser) {
+      return ['SuperAdmin', 'Restaurant_Admin', 'Staff'].includes(this.role);
+    },
     select: false
   },
   name: {
@@ -55,6 +62,14 @@ const userSchema = new Schema({
   },
   lastLogin: {
     type: Date
+  },
+  deviceId: {
+    type: String,
+    sparse: true
+  },
+  tableId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Table'
   }
 }, {
   timestamps: true
@@ -62,6 +77,9 @@ const userSchema = new Schema({
 
 // Only create the compound index
 userSchema.index({ role: 1, restaurantId: 1 });
+
+// Add compound index for device ID and restaurant
+userSchema.index({ deviceId: 1, restaurantId: 1 }, { sparse: true });
 
 // Methods
 userSchema.methods.canAccessRestaurant = function(restaurantId: string): boolean {

@@ -41,6 +41,11 @@ const staffRegisterSchema = z.object({
   phone: z.string().optional()
 });
 
+const qrLoginSchema = z.object({
+  tableId: z.string().min(1),
+  deviceId: z.string().min(1)
+});
+
 export const validateSignup = (req: Request, res: Response, next: NextFunction): void => {
   try {
     signupSchema.parse(req.body);
@@ -80,6 +85,18 @@ export const validateStaffLogin = (req: Request, res: Response, next: NextFuncti
 export const validateStaffRegister = (req: Request, res: Response, next: NextFunction): void => {
   try {
     staffRegisterSchema.parse(req.body);
+    next();
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new BadRequestError(error.errors[0].message);
+    }
+    next(error);
+  }
+};
+
+export const validateQRLogin = (req: Request, res: Response, next: NextFunction): void => {
+  try {
+    qrLoginSchema.parse(req.body);
     next();
   } catch (error) {
     if (error instanceof z.ZodError) {
