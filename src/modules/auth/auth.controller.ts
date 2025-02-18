@@ -4,7 +4,18 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../user/user.model';
 import { Restaurant } from '../restaurant/restaurant.model';
-import { SignupDto, LoginDto, AuthResponse, StaffLoginDto, StaffAuthResponse, StaffRegisterDto, LogoutResponse, CurrentUserResponse, QRLoginDto, QRLoginResponse } from './auth.types';
+import { 
+  SignupDto, 
+  LoginDto, 
+  AuthResponse, 
+  StaffLoginDto, 
+  StaffAuthResponse, 
+  StaffRegisterDto, 
+  LogoutResponse, 
+  CurrentUserResponse,
+  QrLoginDto,
+  QrLoginResponse
+} from './auth.types';
 import { BadRequestError } from '@/common/errors/bad-request-error';
 import { NotFoundError } from '@/common/errors/not-found-error';
 import { CONSTANTS } from '@/config/constants';
@@ -438,25 +449,18 @@ export class AuthController {
 
   public async qrLogin(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { tableId, deviceId }: QRLoginDto = req.body;
+      const { tableId, deviceId, name, phone } = req.body;
 
-      // Find table
+      // Validate table exists
       const table = await Table.findById(tableId);
       if (!table) {
         throw new NotFoundError('Table not found');
       }
 
-      // Check if restaurant is active
-      const restaurant = await Restaurant.findById(table.restaurantId);
-      if (!restaurant || !restaurant.isActive) {
-        throw new BadRequestError('Restaurant is not active');
-      }
-
-      // Create or find customer user
-      let user = await User.findOne({
+      // Find or create user
+      let user = await User.findOne({ 
         deviceId,
-        role: 'Customer',
-        restaurantId: table.restaurantId
+        role: 'Customer'
       });
 
       if (!user) {
@@ -464,41 +468,41 @@ export class AuthController {
         user = await User.create({
           deviceId,
           role: 'Customer',
-          restaurantId: table.restaurantId,
-          isActive: true,
-          name: `Guest-${deviceId.slice(-6)}` // Create a guest name using last 6 chars of deviceId
+          name,
+          phone,
+          restaurantId: table.restaurantId
         });
+      } else {
+        // Update existing user's info
+        user.name = name;
+        user.phone = phone;
+        user.restaurantId = table.restaurantId;
+        await user.save();
       }
 
-      // Update last login and table
-      user.lastLogin = new Date();
-      user.tableId = table._id;
-      await user.save();
-
-      // Generate token
-      const token = this.generateToken({
-        userId: user._id,
-        role: 'Customer',
-        restaurantId: table.restaurantId
-      });
-
-      const response: QRLoginResponse = {
-        user: {
-          id: user._id.toString(),
-          role: 'Customer',
-          tableId: table._id.toString(),
-          restaurantId: table.restaurantId.toString()
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          userId: user._id,
+          role: user.role,
+          restaurantId: table.restaurantId 
         },
-        token,
-        table: {
-          number: table.tableNumber,
-          name: table.name
-        }
-      };
+        CONSTANTS.JWT.SECRET,
+        { expiresIn: CONSTANTS.JWT.EXPIRES_IN }
+      );
 
       res.status(200).json({
         status: 'success',
-        data: response
+        data: {
+          token,
+          user: {
+            id: user._id,
+            name: user.name,
+            phone: user.phone,
+            role: user.role,
+            restaurantId: table.restaurantId
+          }
+        }
       });
     } catch (error) {
       next(error);

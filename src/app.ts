@@ -13,6 +13,7 @@ import restaurantRoutes from './modules/restaurant/restaurant.routes';
 import tableRoutes from './modules/table/table.routes';
 import qrRoutes from './modules/qr/qr.routes';
 import menuRoutes from './modules/menu/menu.routes';
+import orderRoutes from './modules/order/order.routes';
 import path from 'path';
 
 dotenv.config();
@@ -81,6 +82,9 @@ apiRouter.use('/qr', qrRoutes);
 
 console.log('- /menu');
 apiRouter.use('/menu', menuRoutes);
+
+console.log('- /orders');
+apiRouter.use('/orders', orderRoutes);
 
 // Print all registered routes
 const printRoutes = (app: Express) => {

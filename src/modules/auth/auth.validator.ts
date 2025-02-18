@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { BadRequestError } from '@/common/errors/bad-request-error';
+import { isValidObjectId } from 'mongoose';
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -42,8 +43,12 @@ const staffRegisterSchema = z.object({
 });
 
 const qrLoginSchema = z.object({
-  tableId: z.string().min(1),
-  deviceId: z.string().min(1)
+  tableId: z.string().refine(isValidObjectId, {
+    message: 'Invalid table ID format'
+  }),
+  deviceId: z.string().min(1, 'Device ID is required'),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format. Use E.164 format')
 });
 
 export const validateSignup = (req: Request, res: Response, next: NextFunction): void => {
@@ -94,7 +99,7 @@ export const validateStaffRegister = (req: Request, res: Response, next: NextFun
   }
 };
 
-export const validateQRLogin = (req: Request, res: Response, next: NextFunction): void => {
+export const validateQrLogin = (req: Request, res: Response, next: NextFunction): void => {
   try {
     qrLoginSchema.parse(req.body);
     next();

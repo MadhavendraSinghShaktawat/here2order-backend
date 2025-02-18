@@ -77,21 +77,20 @@ export interface CurrentUserResponse {
   updatedAt: Date;
 }
 
-export interface QRLoginDto {
+export interface QrLoginDto {
   tableId: string;
   deviceId: string;
+  name: string;
+  phone: string;
 }
 
-export interface QRLoginResponse {
+export interface QrLoginResponse {
+  token: string;
   user: {
     id: string;
-    role: 'Customer';
-    tableId: string;
-    restaurantId: string;
-  };
-  token: string;
-  table: {
-    number: string;
     name: string;
+    phone: string;
+    role: string;
+    restaurantId: string;
   };
 } 

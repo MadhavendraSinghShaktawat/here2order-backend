@@ -16,18 +16,19 @@ export interface IUser extends Document {
   deviceId?: string;
   tableId?: Types.ObjectId;
   canAccessRestaurant(restaurantId: string): boolean;
+  isAnonymous: boolean;
 }
 
 const userSchema = new Schema({
   email: {
     type: String,
-    required: function(this: IUser) {
-      return ['SuperAdmin', 'Restaurant_Admin', 'Staff'].includes(this.role);
-    },
-    unique: true,
     sparse: true,
-    trim: true,
-    lowercase: true
+    unique: true,
+    validate: {
+      validator: function(v: string | null) {
+        return v === null || /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v);
+      }
+    }
   },
   password: {
     type: String,
@@ -64,6 +65,10 @@ const userSchema = new Schema({
   lastLogin: {
     type: Date
   },
+  isAnonymous: {
+    type: Boolean,
+    default: false
+  },
   deviceId: {
     type: String,
     sparse: true
@@ -81,6 +86,9 @@ userSchema.index({ role: 1, restaurantId: 1 });
 
 // Add compound index for device ID and restaurant
 userSchema.index({ deviceId: 1, restaurantId: 1 }, { sparse: true });
+
+// Add compound index for deviceId and isAnonymous
+userSchema.index({ deviceId: 1, isAnonymous: 1 });
 
 // Methods
 userSchema.methods.canAccessRestaurant = function(restaurantId: string): boolean {

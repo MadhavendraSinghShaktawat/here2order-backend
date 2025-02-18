@@ -528,357 +528,6 @@ PUT /api/v1/table/:id # Update table details
 DELETE /api/v1/table/:id # Delete table and QR code
 =======================
 
-### Staff Login
-
-Login as a staff member or accept staff invitation.
-
-POST /auth/staff/login
-
-#### Headers
-
-```
-Content-Type: application/json
-```
-
-#### Request Body (Regular Login)
-
-```json
-{
-  "email": "staff@example.com",
-  "password": "Password123!"
-}
-```
-
-#### Request Body (First-time Login with Invitation)
-
-```json
-{
-  "email": "staff@example.com",
-  "password": "Password123!",
-  "inviteToken": "abc123def456..."
-}
-```
-
-#### Response (200 OK)
-
-```json
-{
-  "status": "success",
-  "data": {
-    "user": {
-      "id": "65f1a2b3c4d5e6f7g8h9i0j1",
-      "email": "staff@example.com",
-      "name": "John Smith",
-      "role": "Staff",
-      "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
-      "position": "Waiter"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5..."
-  }
-}
-```
-
-### Staff Registration
-
-Complete staff registration with invitation token.
-
-POST /auth/staff-register
-
-#### Headers
-
-```
-Content-Type: application/json
-```
-
-#### Request Body
-
-```json
-{
-  "email": "staff@example.com",
-  "password": "Password123!",
-  "inviteToken": "abc123def456...",
-  "phone": "+1234567890" // Optional
-}
-```
-
-#### Response (201 Created)
-
-```json
-{
-  "status": "success",
-  "data": {
-    "user": {
-      "id": "65f1a2b3c4d5e6f7g8h9i0j1",
-      "email": "staff@example.com",
-      "name": "John Smith",
-      "role": "Staff",
-      "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j2",
-      "position": "Waiter"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5..."
-  }
-}
-```
-
-#### Error Responses
-
-```json
-// 400 Bad Request
-{
-  "status": "error",
-  "message": "Invalid or expired invitation token"
-}
-
-// 400 Bad Request
-{
-  "status": "error",
-  "message": "User already exists"
-}
-```
-
-### Table Management
-
-#### 1. Create Table
-
-Create a new table with QR code.
-
-POST /table
-
-##### Headers
-
-```
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-```
-
-##### Request Body
-
-```json
-{
-  "tableNumber": "T001",
-  "name": "Window Table 1",
-  "capacity": 4
-}
-```
-
-##### Response (201 Created)
-
-```json
-{
-  "status": "success",
-  "data": {
-    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
-    "tableNumber": "T001",
-    "name": "Window Table 1",
-    "capacity": 4,
-    "isActive": true,
-    "qrCodeUrl": "https://storage.googleapis.com/h2o-qrcodes/restaurant-id/T001.png",
-    "createdAt": "2024-03-15T10:00:00.000Z",
-    "updatedAt": "2024-03-15T10:00:00.000Z"
-  }
-}
-```
-
-#### 2. Get All Tables
-
-Get a list of all tables for the restaurant.
-
-GET /table
-
-##### Headers
-
-```
-Authorization: Bearer <jwt_token>
-```
-
-##### Response (200 OK)
-
-```json
-{
-  "status": "success",
-  "data": [
-    {
-      "id": "65f1a2b3c4d5e6f7g8h9i0j1",
-      "tableNumber": "T001",
-      "name": "Window Table 1",
-      "capacity": 4,
-      "isActive": true,
-      "qrCodeUrl": "https://storage.googleapis.com/h2o-qrcodes/restaurant-id/T001.png",
-      "createdAt": "2024-03-15T10:00:00.000Z",
-      "updatedAt": "2024-03-15T10:00:00.000Z"
-    }
-  ]
-}
-```
-
-#### 3. Get Single Table
-
-Get details of a specific table.
-
-GET /table/:id
-
-##### Headers
-
-```
-Authorization: Bearer <jwt_token>
-```
-
-##### Response (200 OK)
-
-```json
-{
-  "status": "success",
-  "data": {
-    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
-    "tableNumber": "T001",
-    "name": "Window Table 1",
-    "capacity": 4,
-    "isActive": true,
-    "qrCodeUrl": "https://storage.googleapis.com/h2o-qrcodes/restaurant-id/T001.png",
-    "createdAt": "2024-03-15T10:00:00.000Z",
-    "updatedAt": "2024-03-15T10:00:00.000Z"
-  }
-}
-```
-
-#### 4. Update Table
-
-Update table details.
-
-PUT /table/:id
-
-##### Headers
-
-```
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-```
-
-##### Request Body
-
-```json
-{
-  "name": "Patio Table 1",
-  "capacity": 6,
-  "isActive": true
-}
-```
-
-##### Response (200 OK)
-
-```json
-{
-  "status": "success",
-  "data": {
-    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
-    "tableNumber": "T001",
-    "name": "Patio Table 1",
-    "capacity": 6,
-    "isActive": true,
-    "qrCodeUrl": "https://storage.googleapis.com/h2o-qrcodes/restaurant-id/T001.png",
-    "createdAt": "2024-03-15T10:00:00.000Z",
-    "updatedAt": "2024-03-15T10:30:00.000Z"
-  }
-}
-```
-
-#### 5. Delete Table
-
-Delete a table and its QR code.
-
-DELETE /table/:id
-
-##### Headers
-
-```
-Authorization: Bearer <jwt_token>
-```
-
-##### Response (200 OK)
-
-```json
-{
-  "status": "success",
-  "data": {
-    "id": "65f1a2b3c4d5e6f7g8h9i0j1",
-    "message": "Table deleted successfully"
-  }
-}
-```
-
-#### Error Responses
-
-##### 400 Bad Request
-
-```json
-{
-  "status": "error",
-  "message": "Table number already exists"
-}
-```
-
-##### 401 Unauthorized
-
-```json
-{
-  "status": "error",
-  "message": "Authentication required"
-}
-```
-
-##### 403 Forbidden
-
-```json
-{
-  "status": "error",
-  "message": "Not authorized to manage tables"
-}
-```
-
-##### 404 Not Found
-
-```json
-{
-  "status": "error",
-  "message": "Table not found"
-}
-```
-
-#### Notes
-
-- Table numbers must be unique within a restaurant
-- QR codes are automatically generated and stored in Google Cloud Storage
-- QR codes link to the table's ordering page
-- Only Restaurant_Admin users can manage tables
-- Table capacity must be between 1 and 50
-- Table names must be between 1 and 50 characters
-- Table numbers must be between 1 and 10 characters
-
-=== Registered Routes ===
-Authentication Routes:
-POST /api/v1/auth/signup # Register new restaurant admin
-POST /api/v1/auth/login # Login for restaurant admin
-POST /api/v1/auth/staff/login # Login for staff members
-POST /api/v1/auth/staff-register # Complete staff registration with invite
-POST /api/v1/auth/logout # Logout current user
-
-User Routes:
-GET /api/v1/users # Get user profile
-
-Staff Management Routes:
-POST /api/v1/staff/invite # Create staff invitation
-GET /api/v1/staff # List all staff and invitations
-PUT /api/v1/staff/:id # Update staff member details
-DELETE /api/v1/staff/:id # Remove staff member or cancel invite
-
-Table Management Routes:
-POST /api/v1/table # Create new table with QR code
-GET /api/v1/table # List all restaurant tables
-GET /api/v1/table/:id # Get specific table details
-PUT /api/v1/table/:id # Update table details
-DELETE /api/v1/table/:id # Delete table and QR code
-=======================
-
 ======================================================================
 
 ### Logout
@@ -1111,7 +760,7 @@ GET /api/v1/qr/scan/:code # Get restaurant details from QR code
 
 ### QR Login
 
-Login or create a customer account after scanning a QR code.
+Login or create a customer account using table QR code.
 
 POST /auth/qr-login
 
@@ -1120,7 +769,9 @@ POST /auth/qr-login
 ```json
 {
   "tableId": "65f1a2b3c4d5e6f7g8h9i0j1",
-  "deviceId": "device-unique-identifier"
+  "deviceId": "device-unique-identifier",
+  "name": "John Doe",
+  "phone": "+1234567890"
 }
 ```
 
@@ -1130,16 +781,13 @@ POST /auth/qr-login
 {
   "status": "success",
   "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "user": {
-      "id": "65f1a2b3c4d5e6f7g8h9i0j1",
+      "id": "65f1a2b3c4d5e6f7g8h9i0j2",
+      "name": "John Doe",
+      "phone": "+1234567890",
       "role": "Customer",
-      "tableId": "65f1a2b3c4d5e6f7g8h9i0j2",
       "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j3"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5...",
-    "table": {
-      "number": "T001",
-      "name": "Window Table 1"
     }
   }
 }
@@ -1152,7 +800,7 @@ POST /auth/qr-login
 ```json
 {
   "status": "error",
-  "message": "Restaurant is not active"
+  "message": "Invalid table ID format"
 }
 ```
 
@@ -1167,10 +815,25 @@ POST /auth/qr-login
 
 #### Notes
 
-- Creates a new customer user if device ID is not found
-- Updates existing customer's table if device ID exists
-- Generates a JWT token for API access
-- # No password required for customer login
+- Creates or finds a customer account
+- Uses deviceId to identify returning customers
+- Automatically assigns customer to the restaurant
+- Token includes restaurant access permissions
+- No authentication required for this endpoint
+- Token expires in 7 days
+- Used for scanning table QR codes
+
+=== Registered Routes ===
+...
+Authentication Routes:
+POST /api/v1/auth/signup # Register new restaurant admin
+POST /api/v1/auth/login # Login for restaurant admin
+POST /api/v1/auth/staff/login # Login for staff members
+POST /api/v1/auth/staff-register # Complete staff registration with invite
+POST /api/v1/auth/logout # Logout current user
+GET /api/v1/auth/me # Get current user info
+POST /api/v1/auth/qr-login # Login via table QR code
+...
 
 ======================================================================
 
@@ -1910,4 +1573,651 @@ GET /api/v1/menu/items/:restaurantId # Get all menu items
 PUT /api/v1/menu/items/:itemId # Update menu item
 DELETE /api/v1/menu/items/:itemId # Delete menu item
 PUT /api/v1/menu/items/:itemId/availability # Toggle item availability
+...
+
+======================================================================
+
+### Place New Order
+
+Create a new order.
+
+POST /orders
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Request Body
+
+```json
+{
+  "tableId": "65f1a2b3c4d5e6f7g8h9i0j1",
+  "items": [
+    {
+      "menuItemId": "65f1a2b3c4d5e6f7g8h9i0j2",
+      "quantity": 2,
+      "notes": "Extra spicy please"
+    },
+    {
+      "menuItemId": "65f1a2b3c4d5e6f7g8h9i0j3",
+      "quantity": 1
+    }
+  ],
+  "specialInstructions": "Allergy to peanuts"
+}
+```
+
+#### Response (201 Created)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j4",
+    "orderNumber": "240315-ABC-001",
+    "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j5",
+    "tableId": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "customerId": "65f1a2b3c4d5e6f7g8h9i0j6",
+    "items": [
+      {
+        "menuItemId": "65f1a2b3c4d5e6f7g8h9i0j2",
+        "name": "Spicy Chicken Wings",
+        "quantity": 2,
+        "price": 12.99,
+        "notes": "Extra spicy please"
+      },
+      {
+        "menuItemId": "65f1a2b3c4d5e6f7g8h9i0j3",
+        "name": "Caesar Salad",
+        "quantity": 1,
+        "price": 8.99
+      }
+    ],
+    "status": "Pending",
+    "totalAmount": 34.97,
+    "specialInstructions": "Allergy to peanuts",
+    "createdAt": "2024-03-15T10:00:00.000Z",
+    "updatedAt": "2024-03-15T10:00:00.000Z"
+  }
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+
+```json
+{
+  "status": "error",
+  "message": "One or more menu items are invalid or unavailable"
+}
+```
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Only customers can place orders"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "Table not found"
+}
+```
+
+#### Notes
+
+- Only authenticated customers can place orders
+- Table must exist and be valid
+- All menu items must exist and be available
+- Order number is auto-generated
+- Total amount is calculated server-side
+- Initial order status is 'Pending'
+- Minimum order is 1 item
+- Each item must have quantity >= 1
+
+=== Registered Routes ===
+...
+Order Routes:
+POST /api/v1/orders # Place new order
+...
+
+======================================================================
+
+### Get Order Details
+
+Get details of a specific order.
+
+GET /orders/:id
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Parameters
+
+```
+id: Order ID
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j4",
+    "orderNumber": "240315-ABC-001",
+    "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j5",
+    "tableId": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "customerId": "65f1a2b3c4d5e6f7g8h9i0j6",
+    "items": [
+      {
+        "menuItemId": "65f1a2b3c4d5e6f7g8h9i0j2",
+        "name": "Spicy Chicken Wings",
+        "quantity": 2,
+        "price": 12.99,
+        "notes": "Extra spicy please"
+      }
+    ],
+    "status": "Pending",
+    "totalAmount": 25.98,
+    "specialInstructions": "Allergy to peanuts",
+    "createdAt": "2024-03-15T10:00:00.000Z",
+    "updatedAt": "2024-03-15T10:00:00.000Z"
+  }
+}
+```
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to view this order"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "Order not found"
+}
+```
+
+#### Notes
+
+- Customers can only view their own orders
+- Staff and Restaurant_Admin can view orders from their restaurant
+- Returns full order details including menu item names
+- Requires authentication
+- Order items include current menu item names
+
+=== Registered Routes ===
+...
+Order Routes:
+POST /api/v1/orders # Place new order
+GET /api/v1/orders/:id # Get order details
+...
+
+======================================================================
+
+### Get Restaurant Orders
+
+Get all orders for a restaurant with filtering and pagination.
+
+GET /orders/restaurant/:restaurantId
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Query Parameters
+
+```
+status: Order status (optional)
+startDate: Start date in ISO format (optional)
+endDate: End date in ISO format (optional)
+page: Page number (default: 1)
+limit: Items per page (default: 10)
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "orders": [
+      {
+        "id": "65f1a2b3c4d5e6f7g8h9i0j4",
+        "orderNumber": "240315-ABC-001",
+        "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j5",
+        "tableId": "65f1a2b3c4d5e6f7g8h9i0j1",
+        "customerId": "65f1a2b3c4d5e6f7g8h9i0j6",
+        "items": [
+          {
+            "menuItemId": "65f1a2b3c4d5e6f7g8h9i0j2",
+            "name": "Spicy Chicken Wings",
+            "quantity": 2,
+            "price": 12.99,
+            "notes": "Extra spicy please"
+          }
+        ],
+        "status": "Pending",
+        "totalAmount": 25.98,
+        "specialInstructions": "Allergy to peanuts",
+        "createdAt": "2024-03-15T10:00:00.000Z",
+        "updatedAt": "2024-03-15T10:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "total": 50,
+      "page": 1,
+      "limit": 10,
+      "pages": 5
+    }
+  }
+}
+```
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to view orders from this restaurant"
+}
+```
+
+#### Notes
+
+- Only accessible by Restaurant_Admin and Staff
+- Can filter orders by status
+- Can filter orders by date range
+- Orders are sorted by creation date (newest first)
+- Includes pagination for large datasets
+- Returns menu item names with orders
+- Staff can only view orders from their restaurant
+
+=== Registered Routes ===
+...
+Order Routes:
+POST /api/v1/orders # Place new order
+GET /api/v1/orders/:id # Get order details
+GET /api/v1/orders/restaurant/:restaurantId # Get restaurant orders
+...
+
+======================================================================
+
+### Get Table Orders
+
+Get all orders for a specific table with filtering and pagination.
+
+GET /api/v1/orders/table/:tableId
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Query Parameters
+
+```
+status: Order status (optional) - 'Pending' | 'Confirmed' | 'Preparing' | 'Ready' | 'Delivered' | 'Cancelled'
+startDate: Start date in ISO format (optional)
+endDate: End date in ISO format (optional)
+page: Page number (default: 1)
+limit: Items per page (default: 10)
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "orders": [
+      {
+        "id": "65f1a2b3c4d5e6f7g8h9i0j4",
+        "orderNumber": "240315-ABC-001",
+        "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j5",
+        "tableId": "65f1a2b3c4d5e6f7g8h9i0j1",
+        "customerId": "65f1a2b3c4d5e6f7g8h9i0j6",
+        "items": [
+          {
+            "menuItemId": "65f1a2b3c4d5e6f7g8h9i0j2",
+            "name": "Spicy Chicken Wings",
+            "quantity": 2,
+            "price": 12.99,
+            "notes": "Extra spicy please"
+          }
+        ],
+        "status": "Pending",
+        "totalAmount": 25.98,
+        "specialInstructions": "Allergy to peanuts",
+        "createdAt": "2024-03-15T10:00:00.000Z",
+        "updatedAt": "2024-03-15T10:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "total": 50,
+      "page": 1,
+      "limit": 10,
+      "pages": 5
+    }
+  }
+}
+```
+
+#### Error Responses
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to view orders from this table"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "Table not found"
+}
+```
+
+#### Notes
+
+- Staff and Restaurant_Admin can view any table's orders in their restaurant
+- Customers can only view orders from their current table
+- Can filter orders by status
+- Can filter orders by date range
+- Orders are sorted by creation date (newest first)
+- Includes pagination for large datasets
+- Returns menu item names with orders
+
+=== Registered Routes ===
+...
+Order Routes:
+POST /api/v1/orders # Place new order
+GET /api/v1/orders/:id # Get order details
+GET /api/v1/orders/restaurant/:restaurantId # Get restaurant orders
+GET /api/v1/orders/table/:tableId # Get table orders
+...
+
+======================================================================
+
+### Update Order Status
+
+Update the status of an order.
+
+PUT /orders/:orderId/status
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Parameters
+
+```
+orderId: Order ID to update
+```
+
+#### Request Body
+
+```json
+{
+  "status": "Confirmed" // One of: 'Pending', 'Confirmed', 'Preparing', 'Ready', 'Delivered', 'Cancelled'
+}
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j4",
+    "orderNumber": "240315-ABC-001",
+    "restaurantId": "65f1a2b3c4d5e6f7g8h9i0j5",
+    "tableId": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "customerId": "65f1a2b3c4d5e6f7g8h9i0j6",
+    "items": [
+      {
+        "menuItemId": "65f1a2b3c4d5e6f7g8h9i0j2",
+        "name": "Spicy Chicken Wings",
+        "quantity": 2,
+        "price": 12.99,
+        "notes": "Extra spicy please"
+      }
+    ],
+    "status": "Confirmed",
+    "totalAmount": 25.98,
+    "specialInstructions": "Allergy to peanuts",
+    "createdAt": "2024-03-15T10:00:00.000Z",
+    "updatedAt": "2024-03-15T10:30:00.000Z"
+  }
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+
+```json
+{
+  "status": "error",
+  "message": "Invalid status value"
+}
+```
+
+or
+
+```json
+{
+  "status": "error",
+  "message": "Cannot transition order from Delivered to Preparing"
+}
+```
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to update this order"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "Order not found"
+}
+```
+
+#### Notes
+
+- Only Restaurant_Admin and Staff can update order status
+- Status must follow valid transitions:
+  - Pending → Confirmed, Cancelled
+  - Confirmed → Preparing, Cancelled
+  - Preparing → Ready, Cancelled
+  - Ready → Delivered, Cancelled
+  - Delivered → (no further transitions)
+  - Cancelled → (no further transitions)
+- Staff can only update orders from their restaurant
+- Returns the complete updated order details
+- Updates the order's updatedAt timestamp
+
+=== Registered Routes ===
+...
+Order Routes:
+POST /api/v1/orders # Place new order
+GET /api/v1/orders/:id # Get order details
+GET /api/v1/orders/restaurant/:restaurantId # Get restaurant orders
+GET /api/v1/orders/table/:tableId # Get table orders
+PUT /api/v1/orders/:orderId/status # Update order status
+...
+
+======================================================================
+
+### Cancel/Delete Order
+
+Cancel an order by setting its status to Cancelled.
+
+DELETE /orders/:orderId
+
+#### Headers
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Parameters
+
+```
+orderId: Order ID to cancel
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "65f1a2b3c4d5e6f7g8h9i0j4",
+    "message": "Order cancelled successfully"
+  }
+}
+```
+
+#### Error Responses
+
+##### 400 Bad Request
+
+```json
+{
+  "status": "error",
+  "message": "Only pending orders can be deleted"
+}
+```
+
+##### 401 Unauthorized
+
+```json
+{
+  "status": "error",
+  "message": "Authentication required"
+}
+```
+
+##### 403 Forbidden
+
+```json
+{
+  "status": "error",
+  "message": "Not authorized to delete this order"
+}
+```
+
+##### 404 Not Found
+
+```json
+{
+  "status": "error",
+  "message": "Order not found"
+}
+```
+
+#### Notes
+
+- Only pending orders can be cancelled
+- Restaurant_Admin and Staff can cancel any order in their restaurant
+- Customers can only cancel their own orders
+- This is a soft delete - the order status is changed to 'Cancelled'
+- Cancelled orders are still visible in order history
+- This action cannot be undone
+
+=== Registered Routes ===
+...
+Order Routes:
+POST /api/v1/orders # Place new order
+GET /api/v1/orders/:id # Get order details
+GET /api/v1/orders/restaurant/:restaurantId # Get restaurant orders
+GET /api/v1/orders/table/:tableId # Get table orders
+PUT /api/v1/orders/:orderId/status # Update order status
+DELETE /api/v1/orders/:orderId # Cancel order
 ...

@@ -1,7 +1,7 @@
 import { Router, RequestHandler, Response, NextFunction } from 'express';
 import { AuthController } from './auth.controller';
 import { authenticate } from '@/middlewares/auth.middleware';
-import { validateSignup, validateLogin, validateStaffLogin, validateStaffRegister, validateQRLogin } from './auth.validator';
+import { validateSignup, validateLogin, validateStaffLogin, validateStaffRegister, validateQrLogin } from './auth.validator';
 import { AuthenticatedRequest } from '@/middlewares/types/auth.types';
 
 const router = Router();
@@ -53,7 +53,7 @@ router.get(
 // Add QR login route
 router.post(
   '/qr-login',
-  validateQRLogin,
+  validateQrLogin,
   (req, res, next) => authController.qrLogin(req, res, next)
 );
 
