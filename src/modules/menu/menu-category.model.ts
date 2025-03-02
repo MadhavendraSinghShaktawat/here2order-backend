@@ -27,7 +27,8 @@ const menuCategorySchema = new Schema({
   restaurantId: {
     type: Schema.Types.ObjectId,
     ref: 'Restaurant',
-    required: true
+    required: true,
+    index: true
   },
   isActive: {
     type: Boolean,
@@ -42,6 +43,6 @@ const menuCategorySchema = new Schema({
 });
 
 // Ensure category names are unique per restaurant
-menuCategorySchema.index({ name: 1, restaurantId: 1 }, { unique: true });
+menuCategorySchema.index({ restaurantId: 1, name: 1 }, { unique: true });
 
 export const MenuCategory = mongoose.model<IMenuCategory>('MenuCategory', menuCategorySchema); 

@@ -5,13 +5,20 @@ export interface CreateMenuCategoryDto {
   sortOrder?: number;
 }
 
+export interface CreateMenuCategoryRequest {
+  name: string;
+  description?: string;
+  restaurantId: string;
+  isActive?: boolean;
+}
+
 export interface MenuCategoryResponse {
   id: string;
   name: string;
   description?: string;
+  restaurantId: string;
   isActive: boolean;
   sortOrder: number;
-  restaurantId: string;
   createdAt: Date;
   updatedAt: Date;
 }

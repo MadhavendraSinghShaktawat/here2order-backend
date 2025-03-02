@@ -96,4 +96,36 @@ export const validateToggleItemAvailability = (req: Request, res: Response, next
     }
     next(error);
   }
+};
+
+// Add this new validator function
+export const validateRestaurantCategoryParams = (req: Request, res: Response, next: NextFunction): void => {
+  try {
+    // Validate restaurantId from params
+    const { restaurantId } = req.params;
+    if (!restaurantId || !mongoose.Types.ObjectId.isValid(restaurantId)) {
+      throw new BadRequestError('Invalid restaurant ID format');
+    }
+    
+    // For POST requests, validate the body
+    if (req.method === 'POST') {
+      const { name, description, isActive } = req.body;
+      
+      if (!name || typeof name !== 'string' || name.trim().length < 2) {
+        throw new BadRequestError('Category name is required and must be at least 2 characters');
+      }
+      
+      if (description !== undefined && (typeof description !== 'string')) {
+        throw new BadRequestError('Description must be a string');
+      }
+      
+      if (isActive !== undefined && typeof isActive !== 'boolean') {
+        throw new BadRequestError('isActive must be a boolean');
+      }
+    }
+    
+    next();
+  } catch (error) {
+    next(error);
+  }
 }; 

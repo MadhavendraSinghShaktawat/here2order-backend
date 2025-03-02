@@ -7,6 +7,8 @@ import { ForbiddenError } from '@/common/errors/forbidden-error';
 import { NotFoundError } from '@/common/errors/not-found-error';
 import { MenuItem } from './menu-item.model';
 import { CreateMenuItemDto, MenuItemResponse, MenuItemListResponse, UpdateMenuItemDto, ToggleItemAvailabilityDto } from './menu.types';
+import mongoose from 'mongoose';
+import { HttpError } from '@/common/errors/http-error';
 
 export class MenuController {
   constructor() {
@@ -28,16 +30,16 @@ export class MenuController {
       // Check if category already exists
       const existingCategory = await MenuCategory.findOne({
         name,
-        restaurantId
+        restaurantId: new mongoose.Types.ObjectId(restaurantId)
       });
 
       if (existingCategory) {
-        throw new BadRequestError('A category with this name already exists');
+        throw new HttpError(409, 'A category with this name already exists for this restaurant');
       }
 
       // Get highest sort order if not provided
       if (sortOrder === undefined) {
-        const highestOrder = await MenuCategory.findOne({ restaurantId })
+        const highestOrder = await MenuCategory.findOne({ restaurantId: new mongoose.Types.ObjectId(restaurantId) })
           .sort({ sortOrder: -1 })
           .select('sortOrder');
         
@@ -48,7 +50,7 @@ export class MenuController {
       // Create category
       const category = await MenuCategory.create({
         ...req.body,
-        restaurantId
+        restaurantId: new mongoose.Types.ObjectId(restaurantId)
       });
 
       const response: MenuCategoryResponse = {
@@ -91,7 +93,7 @@ export class MenuController {
 
       // Get all active categories for the restaurant
       const categories = await MenuCategory.find({
-        restaurantId,
+        restaurantId: new mongoose.Types.ObjectId(restaurantId),
         ...(req.user.role === 'Customer' ? { isActive: true } : {})
       }).sort({ sortOrder: 1 });
 
@@ -161,7 +163,7 @@ export class MenuController {
       // Verify category exists and belongs to restaurant
       const category = await MenuCategory.findOne({
         _id: categoryId,
-        restaurantId
+        restaurantId: new mongoose.Types.ObjectId(restaurantId)
       });
 
       if (!category) {
@@ -171,7 +173,7 @@ export class MenuController {
       // Check if item name already exists
       const existingItem = await MenuItem.findOne({
         name,
-        restaurantId
+        restaurantId: new mongoose.Types.ObjectId(restaurantId)
       });
 
       if (existingItem) {
@@ -181,8 +183,8 @@ export class MenuController {
       // Get highest sort order if not provided
       if (sortOrder === undefined) {
         const highestOrder = await MenuItem.findOne({ 
-          categoryId,
-          restaurantId 
+          categoryId: new mongoose.Types.ObjectId(restaurantId),
+          restaurantId: new mongoose.Types.ObjectId(restaurantId) 
         })
           .sort({ sortOrder: -1 })
           .select('sortOrder');
@@ -193,7 +195,7 @@ export class MenuController {
       // Create menu item
       const menuItem = await MenuItem.create({
         ...req.body,
-        restaurantId
+        restaurantId: new mongoose.Types.ObjectId(restaurantId)
       });
 
       const response: MenuItemResponse = {
@@ -234,7 +236,7 @@ export class MenuController {
 
       // Get all menu items for the restaurant
       const items = await MenuItem.find({
-        restaurantId,
+        restaurantId: new mongoose.Types.ObjectId(restaurantId),
         ...(req.user.role === 'Customer' ? { isActive: true } : {})
       })
         .sort({ categoryId: 1, sortOrder: 1 })
@@ -288,7 +290,7 @@ export class MenuController {
       if (updateData.categoryId) {
         const category = await MenuCategory.findOne({
           _id: updateData.categoryId,
-          restaurantId: userRestaurantId
+          restaurantId: new mongoose.Types.ObjectId(userRestaurantId)
         });
 
         if (!category) {
@@ -300,7 +302,7 @@ export class MenuController {
       if (updateData.name && updateData.name !== menuItem.name) {
         const existingItem = await MenuItem.findOne({
           name: updateData.name,
-          restaurantId: userRestaurantId,
+          restaurantId: new mongoose.Types.ObjectId(userRestaurantId),
           _id: { $ne: itemId }
         });
 

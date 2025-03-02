@@ -1,0 +1,59 @@
+src/
+├── config/                     # Configuration files
+│   ├── database.config.ts     # MongoDB/Mongoose configuration
+│   ├── clerk.config.ts        # Clerk authentication configuration
+│   └── environment.config.ts  # Environment variables configuration
+│
+├── modules/                    # Feature modules
+│   ├── user/
+│   │   ├── dto/
+│   │   │   ├── create-user.dto.ts
+│   │   │   └── update-user.dto.ts
+│   │   ├── interfaces/
+│   │   │   └── user.interface.ts
+│   │   ├── models/
+│   │   │   └── user.model.ts
+│   │   ├── user.controller.ts
+│   │   └── user.service.ts
+│   │
+│   ├── product/
+│   │   ├── dto/
+│   │   ├── interfaces/
+│   │   ├── models/
+│   │   ├── product.controller.ts
+│   │   └── product.service.ts
+│   │
+│   └── order/
+│       ├── dto/
+│       ├── interfaces/
+│       ├── models/
+│       ├── order.controller.ts
+│       └── order.service.ts
+│
+├── middleware/                 # Global middleware
+│   ├── auth.middleware.ts     # Authentication middleware
+│   ├── error-handler.ts    # Error handling middleware
+│   ├── authorize.middleware.ts
+│   └── not-found-handler.ts
+│
+├── common/                    # Shared resources
+│   ├── types/                # Shared TypeScript types/interfaces
+│   ├── utils/                # Utility functions
+│   ├── constants/            # Shared constants
+│   └── errors/               # Custom error classes
+│
+├── database/                 # Database related files
+│   ├── migrations/          # Database migrations
+│   └── seeds/               # Seed data scripts
+│
+├── tests/                    # Test files
+│   ├── unit/                # Unit tests
+│   ├── integration/         # Integration tests
+│   └── fixtures/            # Test fixtures
+│
+├── docs/                     # API documentation
+│   └── swagger/             # Swagger/OpenAPI specs
+│
+├── logs/                     # Application logs
+│
+└── app.ts                    # Application entry point 

@@ -1,9 +1,17 @@
-import { Router, RequestHandler, Response, NextFunction } from 'express';
+import { Router, RequestHandler, Response, NextFunction, Request } from 'express';
 import { MenuController } from './menu.controller';
 import { authenticate } from '@/middlewares/auth.middleware';
 import { authorize } from '@/middlewares/authorize.middleware';
-import { validateCreateMenuCategory, validateCreateMenuItem, validateUpdateMenuItem, validateToggleItemAvailability } from './menu.validator';
+import { 
+  validateCreateMenuCategory, 
+  validateCreateMenuItem, 
+  validateUpdateMenuItem, 
+  validateToggleItemAvailability,
+  validateRestaurantCategoryParams
+} from './menu.validator';
 import { AuthenticatedRequest } from '@/middlewares/types/auth.types';
+import express from 'express';
+import { body, param } from 'express-validator';
 
 const router = Router();
 const menuController = new MenuController();
@@ -25,6 +33,8 @@ const handleRequest = (
   };
 };
 
+// DEPRECATED: This route will be removed in future versions
+// Use /categories/:restaurantId instead
 router.post(
   '/categories',
   authenticate as RequestHandler,
@@ -90,6 +100,44 @@ router.put(
   authorize(['Restaurant_Admin', 'Staff']) as RequestHandler,
   validateToggleItemAvailability,
   handleRequest((req, res, next) => menuController.toggleItemAvailability(req, res, next))
+);
+
+// NEW PREFERRED ROUTE: Create a new menu category for a specific restaurant
+router.post(
+  '/categories/:restaurantId',
+  authenticate as RequestHandler,
+  authorize(['Restaurant_Admin']) as RequestHandler,
+  validateRestaurantCategoryParams,
+  ((req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    if (req.params.restaurantId) {
+      req.body.restaurantId = req.params.restaurantId;
+    }
+    next();
+  }) as RequestHandler,
+  handleRequest((req, res, next) => menuController.createCategory(req, res, next))
+);
+
+// These routes are alternative formats and will remain for compatibility
+router.post(
+  '/restaurants/:restaurantId/categories',
+  authenticate as RequestHandler,
+  authorize(['Restaurant_Admin']) as RequestHandler,
+  validateRestaurantCategoryParams,
+  ((req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    if (req.params.restaurantId) {
+      req.body.restaurantId = req.params.restaurantId;
+    }
+    next();
+  }) as RequestHandler,
+  handleRequest((req, res, next) => menuController.createCategory(req, res, next))
+);
+
+// Get all categories for a specific restaurant
+router.get(
+  '/restaurants/:restaurantId/categories',
+  authenticate as RequestHandler,
+  validateRestaurantCategoryParams,
+  handleRequest((req, res, next) => menuController.getCategories(req, res, next))
 );
 
 export default router; 
