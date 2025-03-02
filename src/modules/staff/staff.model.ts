@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { IStaffInvite } from './staff.types';
+import { StaffInviteDto } from './staff.types';
 
 const staffInviteSchema = new Schema({
   email: {
@@ -62,4 +62,4 @@ staffInviteSchema.index({ email: 1, restaurantId: 1 }, { unique: true });
 staffInviteSchema.index({ token: 1 });
 staffInviteSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-export const StaffInvite = mongoose.model<IStaffInvite & Document>('StaffInvite', staffInviteSchema); 
+export const StaffInvite = mongoose.model<StaffInviteDto & Document>('StaffInvite', staffInviteSchema); 

@@ -21,7 +21,7 @@ export interface StaffResponse {
   joinedAt?: Date;
 }
 
-export interface IStaffInvitation {
+export interface IStaffInvite {
   _id: Types.ObjectId;
   email: string;
   name: string;

@@ -4,12 +4,13 @@ import crypto from 'crypto';
 import { StaffInvitation, InviteStatus } from '../staff-invitation/staff-invitation.model';
 import { User } from '../user/user.model';
 import { Restaurant } from '../restaurant/restaurant.model';
-import { StaffInviteDto, StaffResponse, IStaffInvitation, UpdateStaffDto } from './staff.types';
+import { StaffInviteDto, StaffResponse, IStaffInvite, UpdateStaffDto } from './staff.types';
 import { AuthenticatedRequest } from '@/middlewares/types/auth.types';
 import { BadRequestError } from '@/common/errors/bad-request-error';
 import { ForbiddenError } from '@/common/errors/forbidden-error';
 import { sendStaffInviteEmail } from '@/services/email.service';
 import { NotFoundError } from '@/common/errors/not-found-error';
+import mongoose from 'mongoose';
 
 export class StaffController {
   constructor() {
