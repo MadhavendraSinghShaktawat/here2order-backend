@@ -1,10 +1,8 @@
-export abstract class CustomError extends Error {
-  abstract statusCode: number;
+import { HttpError } from './http-error';
 
-  constructor(message: string) {
-    super(message);
+export abstract class CustomError extends HttpError {
+  constructor(statusCode: number, message: string) {
+    super(statusCode, message);
     Object.setPrototypeOf(this, CustomError.prototype);
   }
-
-  abstract serializeErrors(): { message: string; field?: string }[];
 } 

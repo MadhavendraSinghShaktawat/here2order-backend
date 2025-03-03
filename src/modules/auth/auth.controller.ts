@@ -19,7 +19,7 @@ import {
 import { BadRequestError } from '@/common/errors/bad-request-error';
 import { NotFoundError } from '@/common/errors/not-found-error';
 import { CONSTANTS } from '@/config/constants';
-import { StaffInvitation } from '../staff-invitation/staff-invitation.model';
+import { StaffInvitation, InviteStatus } from '../staff-invitation/staff-invitation.model';
 import { ForbiddenError } from '@/common/errors/forbidden-error';
 import { AuthenticatedRequest } from '@/middlewares/types/auth.types';
 import { Table } from '../table/table.model';
@@ -241,7 +241,7 @@ export class AuthController {
         });
 
         // Update invitation status
-        invitation.status = 'Active';
+        invitation.status = InviteStatus.Active;
         invitation.joinedAt = new Date();
         await invitation.save();
 
@@ -361,7 +361,7 @@ export class AuthController {
       });
 
       // Update invitation status
-      invitation.status = 'Active';
+      invitation.status = InviteStatus.Active;
       invitation.joinedAt = new Date();
       await invitation.save();
 

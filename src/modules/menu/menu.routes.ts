@@ -33,8 +33,50 @@ const handleRequest = (
   };
 };
 
-// DEPRECATED: This route will be removed in future versions
-// Use /categories/:restaurantId instead
+/**
+ * @swagger
+ * tags:
+ *   name: Menu
+ *   description: Menu management
+ */
+
+/**
+ * @swagger
+ * /menu/categories:
+ *   post:
+ *     summary: Create a new menu category
+ *     tags: [Menu]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Appetizers"
+ *               description:
+ *                 type: string
+ *                 example: "Starters and small dishes"
+ *               restaurantId:
+ *                 type: string
+ *                 example: "60d5ec49f1b2c8b1f8e4e1f1"
+ *               isActive:
+ *                 type: boolean
+ *                 example: true
+ *     responses:
+ *       201:
+ *         description: Category created successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal server error
+ */
 router.post(
   '/categories',
   authenticate as RequestHandler,

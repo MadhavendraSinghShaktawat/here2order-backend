@@ -1,20 +1,10 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
+import { IStaffInvite } from '../staff/staff.types';
 
-export type InviteStatus = 'Pending' | 'Active' | 'Inactive' | 'Expired';
-
-export interface IStaffInvitation extends Document {
-  _id: Types.ObjectId;
-  email: string;
-  name: string;
-  phone?: string;
-  position: string;
-  restaurantId: Types.ObjectId;
-  status: InviteStatus;
-  invitedBy: Types.ObjectId;
-  invitedAt: Date;
-  joinedAt?: Date;
-  token: string;
-  expiresAt: Date;
+export enum InviteStatus {
+  Pending = 'Pending',
+  Active = 'Active',
+  Inactive = 'Inactive'
 }
 
 const staffInvitationSchema = new Schema({
@@ -22,8 +12,7 @@ const staffInvitationSchema = new Schema({
     type: String,
     required: true,
     trim: true,
-    lowercase: true,
-    index: true
+    lowercase: true
   },
   name: {
     type: String,
@@ -42,14 +31,12 @@ const staffInvitationSchema = new Schema({
   restaurantId: {
     type: Schema.Types.ObjectId,
     ref: 'Restaurant',
-    required: true,
-    index: true
+    required: true
   },
   status: {
     type: String,
-    enum: ['Pending', 'Active', 'Inactive', 'Expired'],
-    default: 'Pending',
-    required: true
+    enum: Object.values(InviteStatus),
+    default: InviteStatus.Pending
   },
   invitedBy: {
     type: Schema.Types.ObjectId,
@@ -70,8 +57,7 @@ const staffInvitationSchema = new Schema({
   },
   expiresAt: {
     type: Date,
-    required: true,
-    index: true
+    required: true
   }
 }, {
   timestamps: true
@@ -79,14 +65,7 @@ const staffInvitationSchema = new Schema({
 
 // Indexes
 staffInvitationSchema.index({ email: 1, restaurantId: 1 }, { unique: true });
-staffInvitationSchema.index({ token: 1 }, { unique: true });
+staffInvitationSchema.index({ token: 1 });
+staffInvitationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-// Middleware to automatically expire invitations
-staffInvitationSchema.pre('save', function(next) {
-  if (this.expiresAt < new Date() && this.status === 'Pending') {
-    this.status = 'Expired' as InviteStatus;
-  }
-  next();
-});
-
-export const StaffInvitation = mongoose.model<IStaffInvitation>('StaffInvitation', staffInvitationSchema); 
+export const StaffInvitation = mongoose.model<IStaffInvite & Document>('StaffInvitation', staffInvitationSchema); 

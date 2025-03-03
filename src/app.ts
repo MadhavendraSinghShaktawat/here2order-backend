@@ -14,11 +14,16 @@ import tableRoutes from './modules/table/table.routes';
 import qrRoutes from './modules/qr/qr.routes';
 import menuRoutes from './modules/menu/menu.routes';
 import orderRoutes from './modules/order/order.routes';
+import healthRoutes from './modules/health/health.routes';
 import path from 'path';
+import { setupSwagger } from './config/swagger';
 
 dotenv.config();
 
 const app: Express = express();
+
+// Setup Swagger
+setupSwagger(app);
 
 // Security middleware
 app.use(helmet());
@@ -85,6 +90,9 @@ apiRouter.use('/menu', menuRoutes);
 
 console.log('- /orders');
 apiRouter.use('/orders', orderRoutes);
+
+console.log('- /health');
+apiRouter.use('/health', healthRoutes);
 
 // Print all registered routes
 const printRoutes = (app: Express) => {

@@ -1,10 +1,8 @@
 import { CustomError } from './custom-error';
 
 export class ForbiddenError extends CustomError {
-  statusCode = 403;
-
-  constructor(public message: string) {
-    super(message);
+  constructor(message: string = 'Access forbidden') {
+    super(403, message);
     Object.setPrototypeOf(this, ForbiddenError.prototype);
   }
 
