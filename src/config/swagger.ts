@@ -1,6 +1,7 @@
 import swaggerJsDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { Express } from 'express';
+import { env } from './environment';
 
 const swaggerOptions = {
   swaggerDefinition: {
@@ -12,7 +13,8 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:3000/api/v1', // Change this to your production URL
+        url: env.API_URL,
+        description: `${env.NODE_ENV} server`,
       },
     ],
   },

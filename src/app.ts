@@ -17,6 +17,7 @@ import orderRoutes from './modules/order/order.routes';
 import healthRoutes from './modules/health/health.routes';
 import path from 'path';
 import { setupSwagger } from './config/swagger';
+import { env } from './config/environment';
 
 dotenv.config();
 

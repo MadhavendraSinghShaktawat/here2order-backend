@@ -21,7 +21,7 @@ export class HealthController {
    * Detailed health check that includes database connectivity
    */
   public async getDetailedHealth(req: Request, res: Response): Promise<void> {
-    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    const dbStatus = this.getDatabaseStatus();
     
     const healthStatus = {
       status: dbStatus === 'connected' ? 'ok' : 'degraded',
@@ -57,5 +57,10 @@ export class HealthController {
     } catch (error) {
       return -1; // Indicates error
     }
+  }
+
+  private getDatabaseStatus(): string {
+    const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+    return states[mongoose.connection.readyState] || 'unknown';
   }
 } 

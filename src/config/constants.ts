@@ -1,15 +1,19 @@
+import { env } from './environment';
+
 export const CONSTANTS = {
-  PORT: process.env.PORT || 3000,
+  PORT: env.PORT,
+  NODE_ENV: env.NODE_ENV,
   API: {
     PREFIX: '/api/v1',
     TIMEOUT: 30000, // 30 seconds
+    URL: env.API_URL,
   },
   CORS: {
-    ORIGINS: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
+    ORIGINS: env.CORS_ORIGINS,
     METHODS: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] as string[],
   },
   MONGODB: {
-    URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/here2order',
+    URI: env.MONGODB_URI,
     OPTIONS: {
       connectTimeoutMS: 60000, // Increase timeout to 60 seconds
       socketTimeoutMS: 60000,
@@ -17,17 +21,17 @@ export const CONSTANTS = {
       maxPoolSize: 10,
       minPoolSize: 5,
       maxIdleTimeMS: 30000,
-      dbName: process.env.NODE_ENV === 'test' ? 'test' : 'here2order'
+      dbName: env.NODE_ENV === 'test' ? 'test' : 'here2order'
     } as const
   },
   JWT: {
-    SECRET: process.env.JWT_SECRET || 'your-secret-key',
-    EXPIRES_IN: process.env.JWT_EXPIRES_IN ? parseInt(process.env.JWT_EXPIRES_IN) : 7 * 24 * 60 * 60 // 7 days in seconds
+    SECRET: env.JWT_SECRET,
+    EXPIRES_IN: env.JWT_EXPIRES_IN
   },
   GOOGLE_CLOUD: {
-    PROJECT_ID: process.env.GOOGLE_CLOUD_PROJECT_ID || '',
-    KEY_FILE: process.env.GOOGLE_CLOUD_KEY_FILE || '',
-    BUCKET_NAME: process.env.GOOGLE_CLOUD_BUCKET_NAME || ''
+    PROJECT_ID: env.GOOGLE_CLOUD_PROJECT_ID || '',
+    KEY_FILE: env.GOOGLE_CLOUD_KEY_FILE || '',
+    BUCKET_NAME: env.GOOGLE_CLOUD_BUCKET_NAME || ''
   },
-  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000'
+  FRONTEND_URL: env.FRONTEND_URL
 } as const; 

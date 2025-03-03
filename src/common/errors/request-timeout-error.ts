@@ -1,14 +1,12 @@
 import { CustomError } from './custom-error';
 
 export class RequestTimeoutError extends CustomError {
-  statusCode = 408;
-
-  constructor() {
-    super('Request timeout');
+  constructor(message: string = 'Request timeout') {
+    super(408, message);
     Object.setPrototypeOf(this, RequestTimeoutError.prototype);
   }
 
   serializeErrors() {
-    return [{ message: 'Request took too long to process' }];
+    return [{ message: this.message }];
   }
 } 

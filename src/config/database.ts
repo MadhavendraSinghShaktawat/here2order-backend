@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { CONSTANTS } from './constants';
+import { env } from './environment';
 
 let isConnected = false;
 
@@ -33,14 +34,31 @@ const setupMongooseConnection = () => {
   });
 };
 
+const connectWithRetry = async (uri: string, options: any, retries = 5, delay = 5000): Promise<void> => {
+  try {
+    await mongoose.connect(uri, options);
+    console.log(`Connected to MongoDB in ${env.NODE_ENV} environment`);
+  } catch (error) {
+    if (retries === 0) {
+      console.error('Failed to connect to MongoDB after multiple attempts:', error);
+      throw error;
+    }
+    
+    console.log(`Connection to MongoDB failed, retrying in ${delay/1000} seconds...`);
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return connectWithRetry(uri, options, retries - 1, delay);
+  }
+};
+
 export const connectDatabase = async (): Promise<void> => {
   try {
-    if (!CONSTANTS.MONGODB.URI) {
-      throw new Error('MONGODB_URI environment variable is not defined');
-    }
-
+    console.log(`Connecting to MongoDB at ${CONSTANTS.MONGODB.URI}...`);
+    
+    // Setup connection event handlers
     setupMongooseConnection();
-    await mongoose.connect(CONSTANTS.MONGODB.URI, CONSTANTS.MONGODB.OPTIONS);
+    
+    // Connect with retry logic
+    await connectWithRetry(CONSTANTS.MONGODB.URI, CONSTANTS.MONGODB.OPTIONS);
   } catch (error) {
     console.error('Failed to connect to MongoDB:', error);
     throw error;
